@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pure Coco 3D - Hydrating with Purpose</title>
+    
+    <!-- Load Core Libraries: Three.js (3D), GSAP (Animation), Tailwind (Styling) -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.138.3/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.11.3/dist/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.11.3/dist/ScrollTrigger.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Tailwind Config: Keeping the Warm, Organic Palette -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'pure-green': '#10b981', // Primary brand accent green
+                        'pure-ochre': '#d97706', // Warm impact color (Earthy Orange/Ochre)
+                        'pure-cream': '#f8f5f1', // Warm, creamy main background
+                        'pure-charcoal': '#292524', // Soft, warm dark text
+                        'pure-accent': '#f4e9da', // Soft, light accent
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    borderRadius: {
+                        '3xl': '3rem',
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+        
+        /* 1. WebGL Canvas Container: Fixed position to act as the Hero Background */
+        #webgl-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 1; /* Below the main HTML content */
+            opacity: 0.9;
+        }
+
+        /* 2. HTML Content Overlay */
+        .content-overlay {
+            position: relative;
+            z-index: 10; /* Above the 3D canvas */
+            /* Ensure background cream fades in correctly over the canvas */
+            background: linear-gradient(to bottom, 
+                        rgba(248, 245, 241, 0) 0vh,    /* Transparent cream at the top of hero */
+                        rgba(248, 245, 241, 0.9) 80vh, /* Fade to near-opaque cream */
+                        #f8f5f1 100vh);                /* Solid cream past the hero */
+            min-height: 200vh; /* Ensures scrollable area for GSAP interaction */
+        }
+        
+        .soft-shadow {
+             box-shadow: 0 4px 10px -1px rgba(0, 0, 0, 0.08), 0 2px 6px -2px rgba(0, 0, 0, 0.04);
+        }
+        .bg-with-noise {
+            background-image: url('data:image/svg+xml;base64,PHN2ZyB2aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxnIGZpbGw9IiNmMGYwZjAiIGZpbGwtb3BhY2l0eT0iMC4wMyI+PHBhdGggZD0iTS0xIDBoMzJ2MzJIMC0xem0wIDMybDMxLTUuMzktMi4yOC04LjUzLTQuMS0uOTQtLjM2LTQuMTEtNy42LS40MS0xMC44LTYuMDktMS43NS0xLjI0LTEuMDQtNC42LTQuNS4zLTMuOTItMi45LTguMDctMi42LTU.5Mi01LjA5LS4wOS02LjAzLS43Ni01LjYtLjI2eiIvPjwvZz48L3N2Zz4=');
+            background-size: 120px 120px;
+            background-blend-mode: multiply;
+        }
+
+        .hero-text {
+            background-color: rgba(255, 255, 255, 0.7); /* Light, transparent backing for text */
+            backdrop-filter: blur(2px);
+            padding: 1.5rem;
+            border-radius: 1.5rem;
+        }
+    </style>
+</head>
+<body class="font-sans bg-pure-cream text-pure-charcoal antialiased">
+
+    <!-- WebGL Canvas will be rendered here by Three.js -->
+    <canvas id="webgl-canvas"></canvas>
+
+    <!-- HTML Content Overlays -->
+    <div class="content-overlay">
+
+        <!-- Header & Navigation -->
+        <header class="p-4 md:p-6 sticky top-0 z-50 rounded-b-2xl">
+            <div class="max-w-7xl mx-auto flex justify-between items-center bg-white/80 backdrop-blur-sm p-4 rounded-3xl soft-shadow">
+                <!-- Logo --><a href="#" class="flex items-center space-x-2">
+                    <svg class="w-9 h-9 text-pure-green" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2C7.03 2 3 6.03 3 11c0 2.22.84 4.3 2.36 5.86l-1.5 1.5c-.39.39-.39 1.02 0 1.41.39.39 1.02.39 1.41 0L6 18.59c1.56 1.56 3.65 2.36 5.86 2.36 4.97 0 9-4.03 9-9s-4.03-9-9-9zm0 18c-2.45 0-4.73-.97-6.44-2.68L4 18.17l1.5-1.5c.39-.39.39-1.02 0-1.41-.39-.39-1.02-.39-1.41 0L2 17.59 3.41 19c1.7 1.7 3.98 2.59 6.44 2.59 4.41 0 8-3.59 8-8s-3.59-8-8-8-8 3.59-8 8c0 1.63.5 3.14 1.34 4.4L12 16.59zM12 4c-3.87 0-7 3.13-7 7s3.13 7 7 7 7-3.13 7-7-3.13-7-7-7z"/>
+                        <path d="M12 6c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zm0 8c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3z" opacity=".8"/>
+                        <path d="M12 8c-.55 0-1 .45-1 1s.45 1 1 1 1-.45 1-1-.45-1-1-1z" opacity=".6"/>
+                    </svg>
+                    <span class="text-xl font-extrabold text-pure-charcoal">Pure Coco</span>
+                </a>
+                <!-- CTA Button --><a href="#shop" class="bg-pure-green hover:bg-emerald-600 text-white font-semibold py-2 px-6 rounded-full shadow-lg transition duration-300 soft-shadow">
+                    Find Your Can
+                </a>
+            </div>
+        </header>
+
+        <!-- 1. Hero Section (Overlays 3D Canvas) -->
+        <section id="hero-section" class="pt-32 pb-64 text-center h-[90vh] flex flex-col items-center justify-center">
+            <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 hero-text">
+                <p class="text-pure-green font-bold uppercase tracking-widest mb-4">Hydrating Today. Empowering Tomorrow.</p>
+                <h1 class="text-5xl md:text-7xl font-extrabold text-pure-charcoal leading-snug mb-6">
+                    Sip Pure. <span class="text-pure-ochre">Sustain Change.</span>
+                </h1>
+                <p class="text-xl md:text-2xl text-gray-700 mb-12 font-medium">
+                    Every can you enjoy funds sustainable clean water infrastructure for communities in need.
+                </p>
+                <a id="shop" href="#" class="inline-block bg-pure-ochre hover:bg-orange-600 text-white text-xl font-bold py-4 px-10 rounded-full shadow-2xl shadow-orange-400/50 transform hover:-translate-y-1 transition duration-300">
+                    Shop Our Cans & Make An Impact
+                </a>
+            </div>
+        </section>
+
+        <!-- 2. Dual Power (Product & Sustainability) Section - Begins scroll action -->
+        <section id="product-section" class="bg-pure-accent bg-with-noise py-20 md:py-32">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <h2 class="text-4xl md:text-5xl font-extrabold text-center mb-16 text-pure-charcoal">
+                    Goodness for You, Kindness for Earth
+                </h2>
+                <div class="grid md:grid-cols-2 gap-12">
+                    
+                    <!-- Hydration Power --><div class="bg-white p-8 lg:p-10 rounded-3xl shadow-xl soft-shadow border border-gray-100 hover:shadow-2xl transition duration-500">
+                        <div class="text-pure-green mb-4">
+                            <!-- Custom hand-drawn style icon for Electrolyte Power --><svg class="w-14 h-14" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M13.2 2.8c-.4-.4-.9-.6-1.5-.6s-1.1.2-1.5.6c-.4.4-.6.9-.6 1.5v7.2H5.2c-.4 0-.8.2-1.1.5-.3.3-.4.7-.3 1.1l5.2 9.4c.4.7 1.2 1.1 2 1.1.8 0 1.6-.4 2-1.1l5.2-9.4c.1-.4 0-.8-.3-1.1-.3-.3-.7-.5-1.1-.5H13.2V4.3c0-.6-.2-1.1-.6-1.5zM12 4.3v6.7h6.2l-4.5 8.2c-.2.4-.6.6-1.1.6-.5 0-.9-.2-1.1-.6L5.8 11h6.2V4.3z"/>
+                            </svg>
+                        </div>
+                        <h3 class="text-3xl font-bold mb-4 text-pure-charcoal">Natural Electrolyte Boost</h3>
+                        <p class="text-gray-700 mb-4 text-lg">
+                            Sourced from the heart of Nam Hom coconuts, Pure Coco naturally delivers over <span class="font-extrabold text-pure-green">600mg</span> of Potassium. Forget the processed sports drinks—this is hydration the way nature intended.
+                        </p>
+                        <ul class="list-disc list-inside text-gray-600 space-y-2 pl-4">
+                            <li>Only 100% natural, single-source coconut water.</li>
+                            <li>Optimal recovery without artificial ingredients.</li>
+                        </ul>
+                    </div>
+
+                    <!-- Sustainability Commitment --><div class="bg-white p-8 lg:p-10 rounded-3xl shadow-xl soft-shadow border border-gray-100 hover:shadow-2xl transition duration-500">
+                        <div class="text-pure-ochre mb-4">
+                            <!-- Custom hand-drawn style icon for Recycling/Sustainability --><svg class="w-14 h-14" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 2c-1.1 0-2 .9-2 2v2c0 1.1.9 2 2 2s2-.9 2-2V4c0-1.1-.9-2-2-2zM4.93 6.36c.78-.78 2.05-.78 2.83 0l1.41 1.41c-.78.78-.78 2.05 0 2.83-.78.78-2.05.78-2.83 0l-1.41-1.41c-.78-.78-.78-2.05 0-2.83zM2 12c0 1.1.9 2 2 2h2c1.1 0 2-.9 2-2s-.9-2-2-2H4c-1.1 0-2 .9-2 2zM6.36 19.07c-.78.78-.78 2.05 0 2.83.78.78 2.05.78 2.83 0l1.41-1.41c.78-.78.78-2.05 0-2.83-.78-.78-2.05-.78-2.83 0l-1.41 1.41zM12 22c-1.1 0-2-.9-2-2v-2c0-1.1.9-2 2-2s2 .9 2 2v2c0 1.1-.9 2-2 2zM19.07 17.64c-.78-.78-2.05-.78-2.83 0l-1.41 1.41c.78.78.78 2.05 0 2.83.78.78 2.05.78 2.83 0l1.41-1.41c.78-.78.78-2.05 0-2.83zM22 12c0-1.1-.9-2-2-2h-2c-1.1 0-2 .9-2 2s.9 2 2 2h2c1.1 0 2-.9 2-2zM17.64 4.93c.78.78.78 2.05 0 2.83-.78.78-2.05.78-2.83 0l-1.41-1.41c.78-.78.78-2.05 0-2.83.78-.78 2.05-.78 2.83 0l1.41 1.41z"/>
+                            </svg>
+                        </div>
+                        <h3 class="text-3xl font-bold mb-4 text-pure-charcoal">Sustainably Packaged</h3>
+                        <p class="text-gray-700 mb-4 text-lg">
+                            We package every drop in a can made from <span class="font-extrabold text-pure-ochre">100%</span> recycled aluminum—the ultimate material for a circular economy.
+                        </p>
+                        <ul class="list-disc list-inside text-gray-600 space-y-2 pl-4">
+                            <li>Infinitely recyclable and durable.</li>
+                            <li>Superior product protection and chill.</li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. The Impact Engine Section (Hydrate-One-Fund-Two) -->
+        <section id="impact-section" class="bg-pure-cream bg-with-noise text-pure-charcoal py-20 md:py-32 border-t border-gray-200">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                <h2 class="text-4xl md:text-5xl font-extrabold mb-4">
+                    Our Simple Promise: <span class="text-pure-green">Hydrate-One-Fund-Two</span>
+                </h2>
+                <p class="text-xl text-gray-700 max-w-4xl mx-auto mb-16">
+                    Your daily hydration choice drives direct, measurable, and sustainable change for global clean water access.
+                </p>
+
+                <div class="grid md:grid-cols-3 gap-8">
+                    
+                    <!-- Pillar 1: Your Purchase --><div class="p-8 rounded-3xl bg-white shadow-lg soft-shadow border border-gray-100 hover:shadow-xl transition duration-300">
+                        <div class="text-pure-ochre mb-4">
+                            <svg class="w-14 h-14 mx-auto" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M17 1H7C5.895 1 5 1.895 5 3v18c0 1.105.895 2 2 2h10c1.105 0 2-.895 2-2V3c0-1.105-.895-2-2-2zM7 3h10v18H7V3zM10 20h4v-1h-4v1z"/>
+                                <path d="M12 4.5c-.28 0-.5-.22-.5-.5V3c0-.28.22-.5.5-.5s.5.22.5.5v1c0 .28-.22.5-.5.5z"/>
+                            </svg>
+                        </div>
+                        <h3 class="text-2xl font-bold mb-3">1. Your Purchase</h3>
+                        <p class="text-gray-600">
+                            Enjoy premium coconut water. This sale makes the entire impact engine possible.
+                        </p>
+                    </div>
+
+                    <!-- Pillar 2: Immediate Relief --><div class="p-8 rounded-3xl bg-white shadow-lg soft-shadow border border-gray-100 hover:shadow-xl transition duration-300">
+                        <div class="text-pure-green mb-4">
+                             <svg class="w-14 h-14 mx-auto" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 2c-5.52 0-10 4.48-10 10s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15.5c-.28 0-.5-.22-.5-.5v-4.5H7.5c-.28 0-.5-.22-.5-.5s.22-.5.5-.5h3.5V6.5c0-.28.22-.5.5-.5s.5.22.5.5v3.5h3.5c.28 0 .5.22.5.5s-.22.5-.5.5H12.5v4.5c0 .28-.22.5-.5.5z"/>
+                                <path d="M12 22c-5.52 0-10-4.48-10-10S6.48 2 12 2s10 4.48 10 10-4.48 10-10 10zm-1-14c0-.55-.45-1-1-1s-1 .45-1 1v4H6c-.55 0-1 .45-1 1s.45 1 1 1h4v4c0 .55.45 1 1 1s1-.45 1-1v-4h4c.55 0 1-.45 1-1s-.45-1-1-1h-4V8c0-.55-.45-1-1-1z" opacity=".2"/>
+                            </svg>
+                        </div>
+                        <h3 class="text-2xl font-bold mb-3">2. Immediate Relief</h3>
+                        <p class="text-gray-600">
+                            <span class="font-extrabold text-pure-green">0.10</span> per bottle funds water purification tablets for rapid disaster response and emergency relief.
+                        </p>
+                    </div>
+
+                    <!-- Pillar 3: Long-Term Infrastructure --><div class="p-8 rounded-3xl bg-white shadow-lg soft-shadow border border-gray-100 hover:shadow-xl transition duration-300">
+                        <div class="text-pure-ochre mb-4">
+                            <svg class="w-14 h-14 mx-auto" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M22 17c0 1.66-1.34 3-3 3H5c-1.66 0-3-1.34-3-3V7c0-1.66 1.34-3 3-3h14c1.66 0 3 1.34 3 3v10zM5 6c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h14c.55 0 1-.45 1-1V7c0-.55-.45-1-1-1H5z"/>
+                                <path d="M10 9H8c-.55 0-1 .45-1 1v4c0 .55.45 1 1 1h2c.55 0 1-.45 1-1v-4c0-.55-.45-1-1-1zm0 4h-2v-2h2v2zM16 9h-2c-.55 0-1 .45-1 1v4c0 .55.45 1 1 1h2c.55 0 1-.45 1-1v-4c0-.55-.45-1-1-1zm0 4h-2v-2h2v2z"/>
+                            </svg>
+                        </div>
+                        <h3 class="text-2xl font-bold mb-3">3. Long-Term Clean Water</h3>
+                        <p class="text-gray-600">
+                            <span class="font-extrabold text-pure-ochre">10%</span> of net profit invests in permanent RO Filtration Systems for lasting community access.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. Institutional/Mission Section -->
+        <section class="py-20 md:py-32 bg-pure-accent bg-with-noise">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid md:grid-cols-2 gap-16 items-center">
+                
+                <div class="md:order-2">
+                    <img 
+                        src="https://placehold.co/600x400/9ca3af/ffffff?text=3D+Institutional+Image" 
+                        alt="Infographic showing institutional partnership" 
+                        class="rounded-3xl shadow-2xl">
+                </div>
+
+                <div class="md:order-1">
+                    <h2 class="text-4xl md:text-5xl font-extrabold text-pure-charcoal mb-6">
+                        Beyond Retail: Our Institutional Commitment
+                    </h2>
+                    <p class="text-gray-700 text-xl mb-8 leading-relaxed">
+                        Our unique Dual Distribution model ensures we are a force for good at scale. We serve the everyday consumer while simultaneously positioning ourselves as a critical emergency supplier.
+                    </p>
+                    <div class="space-y-4">
+                        <div class="flex items-start space-x-4">
+                            <span class="text-pure-ochre mt-1 flex-shrink-0">
+                                <svg class="w-7 h-7" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M9.8 19.8c-.3-.3-.8-.3-1.1 0l-4.4-4.4c-.3-.3-.3-.8 0-1.1s.8-.3 1.1 0l3.8 3.8 8.1-8.1c.3-.3.8-.3 1.1 0s.3.8 0 1.1l-8.7 8.7c-.3.3-.8.3-1.1 0z"/>
+                                </svg>
+                            </span>
+                            <p class="text-gray-700 text-lg">Targeting bulk supply agreements with major relief organizations (FEMA, Red Cross) for high-volume, low-CAC contracts.</p>
+                        </div>
+                        <div class="flex items-start space-x-4">
+                            <span class="text-pure-ochre mt-1 flex-shrink-0">
+                                <svg class="w-7 h-7" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M9.8 19.8c-.3-.3-.8-.3-1.1 0l-4.4-4.4c-.3-.3-.3-.8 0-1.1s.8-.3 1.1 0l3.8 3.8 8.1-8.1c.3-.3.8-.3 1.1 0s.3.8 0 1.1l-8.7 8.7c-.3.3-.8.3-1.1 0z"/>
+                                </svg>
+                            </span>
+                            <p class="text-gray-700 text-lg">Meeting the WHO standard of <span class="font-extrabold text-pure-ochre">15–20L</span> of water per person per day during critical disaster relief efforts.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 5. Gemini Hydration Coach Section -->
+        <section id="coach-section" class="bg-pure-cream bg-with-noise text-pure-charcoal py-20 md:py-32 border-t border-gray-200">
+            <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+                <h2 class="text-4xl md:text-5xl font-extrabold text-center mb-4">
+                    Your Personalized <span class="text-pure-green">Hydration Coach</span>
+                </h2>
+                <p class="text-xl text-gray-700 max-w-3xl mx-auto mb-10 text-center">
+                    Get an instant, science-backed hydration plan tailored to your lifestyle, powered by Gemini.
+                </p>
+
+                <div class="bg-pure-accent p-8 rounded-3xl shadow-xl soft-shadow space-y-6">
+                    <div class="grid sm:grid-cols-3 gap-4">
+                        <label class="block">
+                            <span class="text-pure-charcoal font-semibold">Weight (kg)</span>
+                            <input type="number" id="coach-weight" value="70" class="mt-1 block w-full rounded-lg border-gray-300 p-3 shadow-sm bg-white focus:ring-pure-green focus:border-pure-green">
+                        </label>
+                        <label class="block">
+                            <span class="text-pure-charcoal font-semibold">Activity Level</span>
+                            <select id="coach-activity" class="mt-1 block w-full rounded-lg border-gray-300 p-3 shadow-sm bg-white focus:ring-pure-green focus:border-pure-green">
+                                <option>Sedentary</option>
+                                <option selected>Moderate (3-5 days/week)</option>
+                                <option>High Intensity (Daily)</option>
+                            </select>
+                        </label>
+                        <label class="block">
+                            <span class="text-pure-charcoal font-semibold">Climate</span>
+                            <select id="coach-climate" class="mt-1 block w-full rounded-lg border-gray-300 p-3 shadow-sm bg-white focus:ring-pure-green focus:border-pure-green">
+                                <option selected>Temperate</option>
+                                <option>Hot & Humid</option>
+                                <option>Dry & Cold</option>
+                            </select>
+                        </label>
+                    </div>
+                    
+                    <button id="coach-button" onclick="generateHydrationAdvice()" class="w-full bg-pure-green hover:bg-emerald-600 text-white font-bold py-3 px-6 rounded-full shadow-lg transition duration-300 transform hover:-translate-y-0.5">
+                        Generate Personalized Plan
+                    </button>
+                </div>
+
+                <div id="coach-loading" class="mt-8 text-center hidden">
+                    <svg class="animate-spin h-8 w-8 text-pure-green mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <p class="text-pure-charcoal mt-2">Consulting the AI Hydration Engine...</p>
+                </div>
+
+                <div id="coach-results" class="mt-10 p-8 bg-white rounded-3xl shadow-2xl soft-shadow hidden">
+                    <h3 class="text-3xl font-bold text-pure-ochre mb-4">Your Custom Hydration Plan:</h3>
+                    <div id="advice-text" class="text-gray-700 space-y-4 mb-6"></div>
+                    <div id="advice-sources" class="text-sm text-gray-500 border-t pt-4 mt-4 space-y-1"></div>
+                </div>
+
+            </div>
+        </section>
+
+
+        <!-- 6. Final CTA Section -->
+        <section class="py-24 bg-pure-green rounded-t-3xl">
+            <div class="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
+                <h2 class="text-4xl md:text-5xl font-extrabold text-white mb-6">
+                    Ready to Join the Pure Movement?
+                </h2>
+                <p class="text-xl text-emerald-100 mb-10">
+                    A simple switch in your daily hydration makes a world of difference. Shop today and contribute to lasting clean water access.
+                </p>
+                <a href="#shop" class="inline-block bg-white hover:bg-gray-100 text-pure-green text-2xl font-extrabold py-4 px-12 rounded-full shadow-2xl transform hover:scale-[1.05] transition duration-300">
+                    Shop Pure Coco Now
+                </a>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="bg-pure-charcoal py-10">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-gray-400">
+                <div class="flex justify-center space-x-8 mb-4">
+                    <a href="#" class="hover:text-white transition duration-300 text-sm">Mission</a>
+                    <a href="#" class="hover:text-white transition duration-300 text-sm">Impact Report</a>
+                    <a href="#" class="hover:text-white transition duration-300 text-sm">Transparency</a>
+                    <a href="#" class="hover:text-white transition duration-300 text-sm">Wholesale</a>
+                </div>
+                <p class="text-xs mt-4 leading-relaxed">&copy; 2025 Pure Coco. Hydrating Today. Empowering Tomorrow. | Packaging: <span class="font-bold">100%</span> Recycled Aluminum.</p>
+            </div>
+        </footer>
+    </div>
+    
+    <!-- Three.js, Shader, and Gemini API Implementation -->
+    <script type="module">
+        // Register ScrollTrigger plugin (needs to be done if loading from CDN)
+        gsap.registerPlugin(ScrollTrigger);
+
+        // Global Three.js variables
+        let scene, camera, renderer, canMesh;
+        let clock = new THREE.Clock();
+
+        // --- GEMINI API INTEGRATION ---
+        const apiKey = "";
+        const coachButton = document.getElementById('coach-button');
+        const loadingDiv = document.getElementById('coach-loading');
+        const resultsDiv = document.getElementById('coach-results');
+        const adviceTextDiv = document.getElementById('advice-text');
+        const adviceSourcesDiv = document.getElementById('advice-sources');
+        
+        async function fetchWithRetry(url, options, maxRetries = 5) {
+            for (let i = 0; i < maxRetries; i++) {
+                try {
+                    const response = await fetch(url, options);
+                    if (!response.ok) {
+                        if (response.status === 429 && i < maxRetries - 1) {
+                            const delay = Math.pow(2, i) * 1000 + Math.random() * 1000;
+                            await new Promise(resolve => setTimeout(resolve, delay));
+                            continue; // Retry request
+                        }
+                        throw new Error(`API request failed with status: ${response.status}`);
+                    }
+                    return response;
+                } catch (error) {
+                    if (i === maxRetries - 1) {
+                        throw new Error(`Max retries reached. ${error.message}`);
+                    }
+                    // Handle network errors or other exceptions by retrying
+                }
+            }
+        }
+        
+        window.generateHydrationAdvice = async function() {
+            const weight = document.getElementById('coach-weight').value;
+            const activity = document.getElementById('coach-activity').value;
+            const climate = document.getElementById('coach-climate').value;
+
+            if (!weight || weight <= 0) {
+                alert("Please enter a valid weight.");
+                return;
+            }
+
+            loadingDiv.classList.remove('hidden');
+            resultsDiv.classList.add('hidden');
+            coachButton.disabled = true;
+
+            const userQuery = `I am a user weighing ${weight}kg, with an activity level of ${activity}, living in a ${climate} climate. I need a daily hydration plan. Please provide a concise, single-paragraph summary of the recommended daily water intake (in liters) for my profile. Also, in a separate, brief paragraph, explain why Potassium is a key electrolyte for this profile, referencing external scientific sources (Google Search). Structure the response using Markdown.`;
+            
+            const systemPrompt = "You are the Pure Coco Hydration Coach. Your advice must be science-backed, concise, encouraging, and framed to recommend optimal hydration and electrolyte balance. Use Google Search grounding.";
+            
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+
+            const payload = {
+                contents: [{ parts: [{ text: userQuery }] }],
+                tools: [{ "google_search": {} }],
+                systemInstruction: {
+                    parts: [{ text: systemPrompt }]
+                },
+            };
+
+            try {
+                const response = await fetchWithRetry(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                const result = await response.json();
+                
+                const candidate = result.candidates?.[0];
+                const text = candidate?.content?.parts?.[0]?.text || "Sorry, I couldn't generate advice right now. Please try again later.";
+                
+                // 1. Extract and display the generated text
+                adviceTextDiv.innerHTML = marked.parse(text);
+
+                // 2. Extract and display grounding sources (citations)
+                let sourcesHtml = 'Sources: ';
+                const groundingMetadata = candidate?.groundingMetadata;
+                let sources = [];
+
+                if (groundingMetadata && groundingMetadata.groundingAttributions) {
+                    sources = groundingMetadata.groundingAttributions
+                        .map(attr => ({
+                            uri: attr.web?.uri,
+                            title: attr.web?.title,
+                        }))
+                        .filter(source => source.uri && source.title);
+
+                    if (sources.length > 0) {
+                        sourcesHtml += sources.map((s, i) => 
+                            `<a href="${s.uri}" target="_blank" class="text-pure-green hover:underline">${i + 1}. ${s.title}</a>`
+                        ).join(' | ');
+                    } else {
+                        sourcesHtml = 'No sources cited.';
+                    }
+                } else {
+                    sourcesHtml = 'No sources cited.';
+                }
+                
+                adviceSourcesDiv.innerHTML = sourcesHtml;
+                
+                resultsDiv.classList.remove('hidden');
+
+            } catch (error) {
+                console.error("Gemini API Error:", error);
+                adviceTextDiv.innerHTML = '<p class="text-red-500 font-semibold">An error occurred while fetching your hydration plan. Please check the console for details.</p>';
+                adviceSourcesDiv.innerHTML = '';
+                resultsDiv.classList.remove('hidden');
+            } finally {
+                loadingDiv.classList.add('hidden');
+                coachButton.disabled = false;
+            }
+        };
+
+        // Helper function for markdown parsing (since we need to display the response text)
+        const marked = {
+            parse: (text) => {
+                // A simplified Markdown parser for demonstration purposes
+                text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+                text = text.replace(/\n\n/g, '</p><p>');
+                text = text.replace(/\n/g, '<br>');
+                return `<p>${text}</p>`;
+            }
+        };
+
+
+        // --- THREE.JS IMPLEMENTATION ---
+
+        function init() {
+            // Scene Setup
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0xf8f5f1); // pure-cream background color
+
+            // Camera Setup
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.z = 2.0; // Slightly closer to ensure visibility
+            camera.position.y = 0;
+
+            // Renderer Setup
+            renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            
+            // --- Lighting removed from scene, handled in shader ---
+
+            createCan();
+            setupScrollAnimation();
+            window.addEventListener('resize', onWindowResize, false);
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        // --- SHADERS (GLSL) ---
+        const fragmentShader = `
+            uniform vec3 uColor;
+            uniform float uTime;
+            uniform float uDitherThreshold;
+            varying vec3 vNormal;
+            varying vec3 vViewPosition;
+            
+            float dither(vec2 pos, float value) {
+                vec2 modPos = mod(pos, 4.0);
+                float x = modPos.x;
+                float y = modPos.y;
+
+                float pattern = 0.0;
+                if (x == 0.0 && y == 0.0) pattern = 1.0/16.0;
+                else if (x == 2.0 && y == 2.0) pattern = 2.0/16.0;
+                else if (x == 3.0 && y == 0.0) pattern = 3.0/16.0;
+                else if (x == 1.0 && y == 2.0) pattern = 4.0/16.0;
+
+                return value + pattern * uDitherThreshold;
+            }
+            
+            void main() {
+                // Fixed light direction for soft shading
+                vec3 lightDirection = normalize(vec3(0.5, 1.0, 1.0));
+                
+                vec3 normal = normalize(vNormal);
+                float diffuse = max(dot(normal, lightDirection), 0.0);
+                
+                float ambient = 0.4;
+                float intensity = diffuse * 0.6 + ambient; 
+
+                // Define the pure color palette for the dither effect
+                // Mapped to RGB values from the Tailwind config
+                vec3 colorLow = vec3(248.0/255.0, 245.0/255.0, 241.0/255.0); // Pure-Cream
+                vec3 colorMid = vec3(41.0/255.0, 37.0/255.0, 36.0/255.0); // Pure-Charcoal (Earthy Neutral)
+                vec3 colorHigh = vec3(16.0/255.0, 185.0/255.0, 129.0/255.0); // Pure-Green
+
+                // Add a gentle ripple effect based on time (uTime)
+                float ripple = sin(vViewPosition.y * 3.0 + uTime * 1.5) * 0.05;
+                intensity += ripple;
+
+                vec3 finalColor;
+                
+                float ditheredIntensity = dither(gl_FragCoord.xy, intensity);
+
+                if (ditheredIntensity > 0.8) {
+                    finalColor = colorHigh;
+                } else if (ditheredIntensity > 0.4) {
+                    finalColor = colorMid; 
+                } else {
+                    finalColor = colorLow;
+                }
+
+                gl_FragColor = vec4(finalColor, 1.0);
+            }
+        `;
+
+        const vertexShader = `
+            varying vec3 vNormal;
+            varying vec3 vViewPosition;
+            
+            void main() {
+                vNormal = normalize(normalMatrix * normal);
+                vec4 worldPosition = modelMatrix * vec4(position, 1.0);
+                vViewPosition = worldPosition.xyz;
+                gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+            }
+        `;
+
+        function createCan() {
+            const canMaterial = new THREE.ShaderMaterial({
+                uniforms: {
+                    uTime: { value: 0.0 },
+                    uDitherThreshold: { value: 0.1 },
+                    uColor: { value: new THREE.Color(0xf8f5f1) },
+                },
+                vertexShader: vertexShader,
+                fragmentShader: fragmentShader,
+            });
+
+            // Geometry (A simple cylinder representing a drink can)
+            const canGeometry = new THREE.CylinderGeometry(0.5, 0.5, 2.0, 32);
+            canMesh = new THREE.Mesh(canGeometry, canMaterial);
+            
+            // Set initial position and rotation
+            canMesh.rotation.x = -0.3; // Tilt slightly forward
+            canMesh.position.y = -0.5;
+
+            scene.add(canMesh);
+        }
+
+        function setupScrollAnimation() {
+            const tl = gsap.timeline({
+                scrollTrigger: {
+                    trigger: ".content-overlay",
+                    start: "top top", 
+                    end: "bottom bottom", 
+                    scrub: true,
+                    markers: false,
+                }
+            });
+
+            // Define animation steps along the scroll path:
+            tl.to(canMesh.rotation, {
+                y: Math.PI * 3, // 3 full rotations
+                x: -0.2, // Keep the forward tilt subtle
+                duration: 5,
+                ease: "power1.inOut"
+            }, 0)
+            .to(canMesh.position, {
+                x: 1.0, // Move the can from center to slightly right
+                y: 0.5, // Move it up slightly
+                duration: 5,
+                ease: "power1.inOut"
+            }, 0)
+            .to(canMesh.scale, {
+                x: 0.7, y: 0.7, z: 0.7, // Shrink slightly into the background
+                duration: 5,
+                ease: "power1.inOut"
+            }, 0);
+        }
+
+        // Render Loop
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            const elapsed = clock.getElapsedTime();
+            
+            if (canMesh && canMesh.material.uniforms.uTime) {
+                canMesh.material.uniforms.uTime.value = elapsed;
+            }
+
+            // Continuous rotation when not scrolling hard
+            if (window.scrollY < window.innerHeight * 0.8) {
+                canMesh.rotation.y += 0.002;
+            }
+
+            renderer.render(scene, camera);
+        }
+
+        // --- NEW: Guarantee Initialization on Window Load ---
+        window.onload = function () {
+            try {
+                init();
+                animate();
+            } catch (e) {
+                console.error("Three.js initialization failed:", e);
+                // Fallback UI message might go here if the canvas remains blank
+            }
+        };
+
+    </script>
+</body>
+</html>
