@@ -1,0 +1,892 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pure Coco - Plastic-Light Hydration for a Thirsty World</title>
+    <meta name="description" content="Pure Coco is 100% Nam Hom coconut water that hydrates you and funds clean water projects for communities in need.">
+    <meta property="og:title" content="Pure Coco - Plastic-Light Hydration for a Thirsty World">
+    <meta property="og:description" content="Every can of Pure Coco you drink helps fund sustainable clean water infrastructure around the world.">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="public/cantropical.png">
+    <meta property="og:url" content="https://purecoco.vercel.app/">
+
+    <link rel="icon" type="image/svg+xml" href="public/svglogo.svg">
+    <link rel="icon" type="image/png" href="public/logo.png">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.138.3/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.11.3/dist/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.11.3/dist/ScrollTrigger.min.js"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'pc-primary': '#00e676', // BRIGHT AQUA/LIME GREEN (Primary Action)
+                        'pc-secondary': '#00b0ff', // VIVID SKY BLUE (Impact/Water)
+                        'pc-background': '#ffffff', // CRISP WHITE
+                        'pc-text': '#1a1a1a', // DEEP BLACK
+                        'pc-light-accent': '#f0f0f0', // Light Gray/Accent background
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    borderRadius: {
+                        '3xl': '2rem', // Slightly sharper than the previous 3rem
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+        
+        /* 1. WebGL Canvas Container: Fixed position to act as the Hero Background */
+        #webgl-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 1; /* Below the main HTML content */
+            opacity: 1; /* Maintain full visibility */
+        }
+
+        /* 2. HTML Content Overlay */
+        .content-overlay {
+            position: relative;
+            z-index: 10; /* Above the 3D canvas */
+            /* New: Immediate fade from canvas to solid white background */
+            background: linear-gradient(to bottom, 
+                                rgba(255, 255, 255, 0) 0vh,      /* Transparent at the top of hero */
+                                rgba(255, 255, 255, 1) 90vh,     /* Start solid white just before fold */
+                                #ffffff 100vh);                  /* Solid white past the hero */
+            min-height: 200vh;
+        }
+        
+        .soft-shadow {
+             box-shadow: 0 8px 30px -5px rgba(0, 0, 0, 0.1), 0 4px 10px -2px rgba(0, 0, 0, 0.05);
+        }
+        .bg-with-noise {
+            /* Using pc-light-accent for noise base color */
+            background-color: #f0f0f0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 4 4' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.08'/%3E%3C/svg%3E");
+            background-size: 100px 100px;
+            background-blend-mode: overlay;
+        }
+
+        /* New Hero Text Style: Solid white background for high contrast */
+        .hero-text {
+            background-color: #ffffff; 
+            border: 1px solid #e0e0e0;
+            padding: 2rem;
+            border-radius: 2rem;
+            box-shadow: 0 10px 40px -5px rgba(0,0,0,0.2);
+            backdrop-filter: blur(8px);
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                scroll-behavior: auto !important;
+                animation-duration: 0.001ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.001ms !important;
+            }
+        }
+    </style>
+</head>
+<body class="font-sans bg-pc-background text-pc-text antialiased">
+
+    <canvas id="webgl-canvas"></canvas>
+
+    <div class="content-overlay">
+
+        <div id="product-modal" class="fixed inset-0 bg-pc-text/60 flex items-center justify-center px-4 z-50 hidden">
+            <div class="bg-white rounded-3xl max-w-md w-full p-6 soft-shadow relative">
+                <button type="button" class="absolute right-4 top-4 text-gray-400 hover:text-pc-text" onclick="closeProductModal()" aria-label="Close pre-order form">
+                    &times;
+                </button>
+                <h2 id="product-modal-title" class="text-2xl font-extrabold text-pc-text mb-2">
+                    Pre-order Pure Coco
+                </h2>
+                <p class="text-sm text-gray-600 mb-4">“Pure Coco became my go-to post-run drink. I love that it actually does good beyond my bottle.”</p>
+                <p class="text-xs font-semibold text-pc-text">ALEX • MARATHONER</p>
+                <form id="preorder-form" class="space-y-4">
+                    <input type="hidden" id="product-type" value="single">
+                    <label class="block text-sm text-pc-text font-medium">
+                        Email
+                        <input type="email" name="email" required class="mt-1 block w-full rounded-xl border border-gray-300 p-2.5 text-sm focus:ring-pc-primary focus:border-pc-primary">
+                    </label>
+                    <label class="block text-sm text-pc-text font-medium">
+                        City
+                        <input type="text" name="city" required class="mt-1 block w-full rounded-xl border border-gray-300 p-2.5 text-sm focus:ring-pc-primary focus:border-pc-primary">
+                    </label>
+                    <label class="block text-sm text-pc-text font-medium">
+                        Quantity
+                        <input type="number" name="quantity" min="1" value="1" required class="mt-1 block w-full rounded-xl border border-gray-300 p-2.5 text-sm focus:ring-pc-primary focus:border-pc-primary">
+                    </label>
+                    <button type="submit" class="w-full bg-pc-primary hover:bg-pc-secondary text-pc-text font-bold py-3 rounded-full text-lg shadow-xl transition transform hover:scale-[1.01]">
+                        Submit mock pre-order
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <header class="p-4 md:p-6 sticky top-0 z-50">
+            <div class="max-w-7xl mx-auto flex justify-between items-center bg-white/90 backdrop-blur-md p-4 rounded-full soft-shadow border border-pc-light-accent">
+                <a href="#hero" class="flex items-center space-x-2">
+                    <img src="public/logo.png" alt="Pure Coco logo" class="w-9 h-9 object-contain">
+                    <span class="text-xl font-extrabold text-pc-text">Pure Coco</span>
+                </a>
+                <nav class="hidden md:flex items-center space-x-6 text-sm font-medium">
+                    <a href="#product" class="text-pc-text hover:text-pc-primary transition">Product</a>
+                    <a href="#benefits" class="text-pc-text hover:text-pc-primary transition">Benefits</a>
+                    <a href="#impact" class="text-pc-text hover:text-pc-primary transition">Impact</a>
+                    <a href="#story" class="text-pc-text hover:text-pc-primary transition">Story</a>
+                    <a href="#coach-section" class="text-pc-text hover:text-pc-primary transition">Coach</a>
+                </nav>
+                <a href="#product" class="ml-4 bg-pc-primary hover:bg-pc-secondary text-pc-text font-bold py-2.5 px-7 rounded-full shadow-lg transition duration-300 transform hover:-translate-y-0.5">
+                    Shop Now
+                </a>
+            </div>
+        </header>
+
+        <section id="hero" class="pt-32 pb-24 md:pb-40 h-[90vh] flex items-center">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+                <div class="hero-text grid md:grid-cols-2 gap-12 items-center">
+                    <div class="text-left space-y-6">
+                        <p class="text-pc-secondary font-bold uppercase tracking-widest text-sm">PLASTIC-LIGHT HYDRATION</p>
+                        <h1 class="text-5xl md:text-7xl font-extrabold text-pc-text leading-tight">
+                            The Clean Swap:
+                            <span class="text-pc-primary block">Electrolytes & Ecosystems.</span>
+                        </h1>
+                        <p class="text-xl text-gray-700 font-medium">
+                            **100% Nam Hom coconut water** in endlessly recyclable aluminum. Every can funds **clean water infrastructure** for vulnerable communities worldwide.
+                        </p>
+                        <div class="flex flex-col sm:flex-row sm:items-center gap-4 pt-4">
+                            <a id="shop" href="#product" class="inline-block bg-pc-primary hover:bg-pc-secondary text-pc-text text-xl font-extrabold py-4 px-10 rounded-full shadow-2xl shadow-pc-primary/50 transform hover:scale-[1.05] transition duration-300 text-center">
+                                Hydrate & Fund Change
+                            </a>
+                            <a href="#impact" class="inline-flex items-center justify-center text-pc-text font-semibold text-base hover:text-pc-primary transition">
+                                See Our Commitment
+                                <span class="ml-2 inline-block h-6 w-6 rounded-full border border-pc-text flex items-center justify-center text-sm">&#8595;</span>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="flex justify-center md:justify-end">
+                        <img 
+                            src="public/cantropical.png" 
+                            alt="Pure Coco tropical can on a soft cream background" 
+                            class="w-64 md:w-96 drop-shadow-2xl rounded-3xl object-contain transform rotate-3"
+                            loading="lazy"
+                            decoding="async"
+                        >
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="impact-strip" class="bg-pc-light-accent py-8 md:py-10 border-t-8 border-pc-primary/70">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex flex-col md:flex-row items-center justify-between gap-8">
+                    <p class="text-lg uppercase tracking-[0.2em] font-extrabold text-pc-text/80 md:w-1/4">
+                        The Three Steps of Impact
+                    </p>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 w-full md:w-3/4">
+                        <div class="flex items-start space-x-4 bg-white p-4 rounded-2xl shadow-md">
+                            <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-pc-primary soft-shadow flex-shrink-0">
+                                <span class="text-pc-text text-xl font-extrabold">1</span>
+                            </div>
+                            <p class="text-sm text-pc-text">
+                                <span class="font-bold">You Buy</span><br>
+                                Choose plastic-free, superior coconut water.
+                            </p>
+                        </div>
+                        <div class="flex items-start space-x-4 bg-white p-4 rounded-2xl shadow-md">
+                            <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-pc-secondary soft-shadow flex-shrink-0">
+                                <span class="text-pc-text text-xl font-extrabold">2</span>
+                            </div>
+                            <p class="text-sm text-pc-text">
+                                <span class="font-bold">We Fund</span><br>
+                                A portion of sales goes to global clean water.
+                            </p>
+                        </div>
+                        <div class="flex items-start space-x-4 bg-white p-4 rounded-2xl shadow-md">
+                            <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-pc-text soft-shadow flex-shrink-0">
+                                <span class="text-pc-primary text-xl font-extrabold">3</span>
+                            </div>
+                            <p class="text-sm text-pc-text">
+                                <span class="font-bold">They Gain</span><br>
+                                Communities access resilient water systems.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="product" class="bg-pc-background py-20 md:py-32">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <h2 class="text-4xl md:text-6xl font-extrabold text-center text-pc-text mb-16">
+                    Hydration Made Simple.
+                </h2>
+                <div class="grid lg:grid-cols-3 gap-10 items-stretch">
+                    
+                    <aside class="bg-pc-light-accent rounded-3xl soft-shadow p-8 lg:p-10 space-y-8 flex flex-col justify-start border-l-4 border-pc-secondary">
+                        <h3 class="text-2xl font-extrabold text-pc-text">The Pure Coco Difference</h3>
+                        <ul class="space-y-4 text-lg text-pc-text/80">
+                            <li class="flex items-start space-x-3">
+                                <span class="text-pc-secondary font-bold text-2xl mt-[-4px]">&#9679;</span>
+                                <p><span class="font-extrabold">Single-Origin Excellence:</span> Only the best Nam Hom coconuts, known for their natural sweetness.</p>
+                            </li>
+                            <li class="flex items-start space-x-3">
+                                <span class="text-pc-secondary font-bold text-2xl mt-[-4px]">&#9679;</span>
+                                <p><span class="font-extrabold">Nature's Electrolytes:</span> Over 600mg of natural Potassium. No added sugars, ever.</p>
+                            </li>
+                            <li class="flex items-start space-x-3">
+                                <span class="text-pc-secondary font-bold text-2xl mt-[-4px]">&#9679;</span>
+                                <p><span class="font-extrabold">100% Recyclable:</span> Packaged exclusively in infinitely recyclable aluminum.</p>
+                            </li>
+                        </ul>
+                        <p class="text-sm text-gray-500 pt-4 mt-auto">
+                            Pure Coco is currently in pre-launch. Mock pre-orders help us allocate initial shipments by city.
+                        </p>
+                    </aside>
+
+                    <article class="bg-white rounded-3xl soft-shadow border border-gray-200 p-8 flex flex-col h-full hover:border-pc-primary transition duration-300">
+                        <span class="text-pc-primary text-5xl mb-4">✨</span>
+                        <h3 class="text-3xl font-extrabold text-pc-text mb-2">Single Can</h3>
+                        <p class="text-xl text-pc-text/80 mb-6">Perfect for trying it out or on-the-go hydration.</p>
+                        <p class="text-5xl font-extrabold text-pc-text mb-1">$3<span class="text-xl font-bold align-top">.50</span></p>
+                        <p class="text-sm text-gray-500 mb-8">per 12oz can • mock pricing</p>
+                        <button type="button" class="mt-auto w-full bg-pc-primary hover:bg-pc-secondary text-pc-text font-bold py-3 px-4 rounded-full text-lg shadow-xl transition transform hover:scale-[1.02]" onclick="openProductModal('single')">
+                            Pre-order 1 Can
+                        </button>
+                    </article>
+
+                    <article class="bg-white rounded-3xl soft-shadow border-4 border-pc-secondary p-8 flex flex-col h-full relative overflow-hidden transform scale-[1.02] hover:scale-[1.05] transition duration-300">
+                        <span class="absolute right-6 top-6 inline-flex items-center rounded-full bg-pc-secondary text-pc-text text-sm font-bold px-4 py-1.5 shadow-md uppercase">Most Popular</span>
+                        <span class="text-pc-secondary text-5xl mt-8 mb-4">📦</span>
+                        <h3 class="text-3xl font-extrabold text-pc-text mb-2">12-Pack Case</h3>
+                        <p class="text-xl text-pc-text/80 mb-6">Stock the fridge and maximize your clean water impact.</p>
+                        <p class="text-5xl font-extrabold text-pc-text mb-1">$36<span class="text-xl font-bold align-top">.00</span></p>
+                        <p class="text-sm text-gray-500 mb-8">12 × 12oz cans • mock pricing</p>
+                        <button type="button" class="mt-auto w-full bg-pc-secondary hover:bg-pc-primary text-pc-text font-bold py-3 px-4 rounded-full text-lg shadow-xl transition transform hover:scale-[1.02]" onclick="openProductModal('bulk')">
+                            Pre-order 12-Pack
+                        </button>
+                    </article>
+                </div>
+            </div>
+        </section>
+        
+        <section id="benefits" class="bg-pc-light-accent bg-with-noise py-20 md:py-32">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <h2 class="text-4xl md:text-6xl font-extrabold text-center mb-16 text-pc-text">
+                    Pure Power: Two Kinds of Goodness
+                </h2>
+                <div class="grid md:grid-cols-2 gap-12">
+                    
+                    <div class="bg-white p-8 lg:p-12 rounded-3xl shadow-xl soft-shadow border-t-8 border-pc-primary">
+                        <div class="text-pc-primary mb-4">
+                             
+
+[Image of a lightning bolt inside a water drop]
+
+                        </div>
+                        <h3 class="text-4xl font-extrabold mb-4 text-pc-text">Electrolyte Recharge</h3>
+                        <p class="text-pc-text/90 mb-4 text-lg">
+                            Forget the processed sports drinks. Our coconut water delivers natural potassium, crucial for **nerve function, muscle contraction, and fluid balance**. It's optimal recovery, naturally sourced.
+                        </p>
+                        <ul class="list-disc list-inside text-gray-600 space-y-2 pl-4 text-base">
+                            <li>Over **600mg** of naturally occurring Potassium per can.</li>
+                            <li>Zero added sugars or artificial sweeteners.</li>
+                            <li>Clean hydration for peak performance.</li>
+                        </ul>
+                    </div>
+
+                    <div class="bg-white p-8 lg:p-12 rounded-3xl shadow-xl soft-shadow border-t-8 border-pc-secondary">
+                        <div class="text-pc-secondary mb-4">
+                             
+                        </div>
+                        <h3 class="text-4xl font-extrabold mb-4 text-pc-text">Resilient Planet Packaging</h3>
+                        <p class="text-pc-text/90 mb-4 text-lg">
+                            We chose aluminum because it is the **most recycled and recyclable material on Earth**. It protects the contents better than plastic, is lighter to ship, and aligns with our mission to combat single-use waste.
+                        </p>
+                        <ul class="list-disc list-inside text-gray-600 space-y-2 pl-4 text-base">
+                            <li>Made from **100% recycled aluminum**.</li>
+                            <li>Infinitely recyclable packaging.</li>
+                            <li>A firm commitment to a plastic-light future.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="impact" class="bg-pc-background py-20 md:py-32 border-t border-pc-light-accent">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                <h2 class="text-5xl md:text-6xl font-extrabold mb-6">
+                    Our Core Mission: <span class="text-pc-secondary">Clean Water Access</span>
+                </h2>
+                <p class="text-xl text-gray-700 max-w-4xl mx-auto mb-16">
+                    We ensure communities have safe, resilient water systems **long after** disaster strikes. This is achieved through direct product contribution and funding long-term infrastructure.
+                </p>
+
+                <div class="grid md:grid-cols-3 gap-8">
+                    
+                    <div class="p-8 rounded-3xl bg-pc-light-accent soft-shadow hover:shadow-xl transition duration-300 transform hover:-translate-y-1 border-b-4 border-pc-primary">
+                        <div class="text-pc-primary mb-4">
+                             
+                        </div>
+                        <h3 class="text-2xl font-extrabold mb-3 text-pc-text">Retail Sales Fuel</h3>
+                        <p class="text-gray-600 text-base">
+                            Every single purchase directly allocates funds. This ensures our philanthropic efforts scale directly with our sales growth, providing reliable support.
+                        </p>
+                    </div>
+
+                    <div class="p-8 rounded-3xl bg-pc-light-accent soft-shadow hover:shadow-xl transition duration-300 transform hover:-translate-y-1 border-b-4 border-pc-secondary">
+                        <div class="text-pc-secondary mb-4">
+                             
+                        </div>
+                        <h3 class="text-2xl font-extrabold mb-3 text-pc-text">Disaster Ready Stock</h3>
+                        <p class="text-gray-600 text-base">
+                            We preemptively stock products at key distribution hubs, ready to ship to shelters, community centers, and institutional partners during emergencies.
+                        </p>
+                    </div>
+
+                    <div class="p-8 rounded-3xl bg-pc-light-accent soft-shadow hover:shadow-xl transition duration-300 transform hover:-translate-y-1 border-b-4 border-pc-primary">
+                        <div class="text-pc-primary mb-4">
+                             
+
+[Image of a community water well]
+
+                        </div>
+                        <h3 class="text-2xl font-extrabold mb-3 text-pc-text">Permanent Solutions</h3>
+                        <p class="text-gray-600 text-base">
+                            Funding goes beyond drops. We finance the installation of water filtration, purification, and storage systems that serve communities for years.
+                        </p>
+                    </div>
+                </div>
+                
+                <a href="#story" class="mt-16 inline-block text-pc-secondary font-bold text-lg border-b-2 border-pc-secondary/50 hover:border-pc-secondary transition duration-330">
+                    Read the full story of our commitment &rarr;
+                </a>
+            </div>
+        </section>
+
+        <section id="story" class="py-20 md:py-32 bg-pc-background border-t-8 border-pc-light-accent/80">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-16">
+                    <p class="text-sm font-semibold tracking-[0.2em] uppercase text-pc-primary mb-3">TRUSTED BY PEOPLE AND PARTNERS</p>
+                    <h2 class="text-4xl md:text-5xl font-extrabold text-pc-text">
+                        The Dual Impact in Action.
+                    </h2>
+                </div>
+                
+                <div class="grid md:grid-cols-3 gap-8 mb-20">
+                    <div class="bg-pc-light-accent rounded-3xl p-6 soft-shadow text-left border-l-4 border-pc-primary">
+                        <p class="text-base font-medium text-pc-text mb-4 leading-relaxed">"Pure Coco became my go-to post-run drink. I love that it actually does good beyond my bottle. Clean energy and clean conscience."</p>
+                        <p class="text-sm font-extrabold text-pc-text/80">ALEX • MARATHONER</p>
+                    </div>
+                    <div class="bg-pc-light-accent rounded-3xl p-6 soft-shadow text-left border-l-4 border-pc-secondary">
+                        <p class="text-base font-medium text-pc-text mb-4 leading-relaxed">"Tastes incredible, ingredients are simple, and I feel better about every can I crack open knowing it's the right ecological choice."</p>
+                        <p class="text-sm font-extrabold text-pc-text/80">PRIYA • NEW PARENT</p>
+                    </div>
+                    <div class="bg-pc-light-accent rounded-3xl p-6 soft-shadow text-left border-l-4 border-pc-primary">
+                        <p class="text-base font-medium text-pc-text mb-4 leading-relaxed">"We stock Pure Coco in the studio fridge. It’s a talking point with clients about impact and the need for plastic alternatives."</p>
+                        <p class="text-sm font-extrabold text-pc-text/80">JORDAN • TRAINER</p>
+                    </div>
+                </div>
+
+                <div class="max-w-7xl mx-auto grid md:grid-cols-2 gap-16 items-center bg-pc-light-accent p-12 rounded-[3rem] soft-shadow border border-gray-200">
+                    
+                    <div class="md:order-2 flex justify-center">
+                         
+                    </div>
+
+                    <div class="md:order-1">
+                        <h3 class="text-3xl md:text-4xl font-extrabold text-pc-text mb-6">
+                            Institutional Resilience
+                        </h3>
+                        <p class="text-gray-700 text-lg mb-8 leading-relaxed">
+                            Our unique distribution model is designed to service **both consumers and large-scale relief operations** like FEMA and the Red Cross. Clean water must be durable, storable, and rapidly deployable—aluminum cans meet all three criteria.
+                        </p>
+                        <div class="space-y-4">
+                            <div class="flex items-start space-x-4">
+                                <span class="text-pc-secondary mt-1 flex-shrink-0 text-2xl">
+                                    &check;
+                                </span>
+                                <p class="text-gray-700 text-base font-medium">Bulk supply contracts targeting government and large NGOs for crisis response.</p>
+                            </div>
+                            <div class="flex items-start space-x-4">
+                                <span class="text-pc-secondary mt-1 flex-shrink-0 text-2xl">
+                                    &check;
+                                </span>
+                                <p class="text-gray-700 text-base font-medium">Durable, 5-year shelf life in robust, compact packaging.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="coach-section" class="bg-pc-background py-20 md:py-32 border-t border-pc-light-accent">
+            <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+                <h2 class="text-4xl md:text-5xl font-extrabold text-center mb-4">
+                    Get Your <span class="text-pc-primary">Hydration Plan</span>
+                </h2>
+                <p class="text-xl text-gray-700 max-w-3xl mx-auto mb-10 text-center">
+                    Use our Gemini-powered coach to get an instant, science-backed daily water and electrolyte recommendation based on your needs.
+                </p>
+
+                <div class="bg-pc-light-accent p-8 rounded-3xl soft-shadow space-y-6 border-4 border-pc-primary/50">
+                    <div class="grid sm:grid-cols-3 gap-4">
+                        <label class="block">
+                            <span class="text-pc-text font-semibold">Weight (kg)</span>
+                            <input type="number" id="coach-weight" value="70" class="mt-1 block w-full rounded-lg border-gray-300 p-3 shadow-sm bg-white focus:ring-pc-primary focus:border-pc-primary">
+                        </label>
+                        <label class="block">
+                            <span class="text-pc-text font-semibold">Activity Level</span>
+                            <select id="coach-activity" class="mt-1 block w-full rounded-lg border-gray-300 p-3 shadow-sm bg-white focus:ring-pc-primary focus:border-pc-primary">
+                                <option>Sedentary</option>
+                                <option selected>Moderate (3-5 days/week)</option>
+                                <option>High Intensity (Daily)</option>
+                            </select>
+                        </label>
+                        <label class="block">
+                            <span class="text-pc-text font-semibold">Climate</span>
+                            <select id="coach-climate" class="mt-1 block w-full rounded-lg border-gray-300 p-3 shadow-sm bg-white focus:ring-pc-primary focus:border-pc-primary">
+                                <option selected>Temperate</option>
+                                <option>Hot & Humid</option>
+                                <option>Dry & Cold</option>
+                            </select>
+                        </label>
+                    </div>
+                    
+                    <button id="coach-button" onclick="generateHydrationAdvice()" class="w-full bg-pc-primary hover:bg-pc-secondary text-pc-text font-bold py-3 px-6 rounded-full shadow-lg transition duration-300 transform hover:scale-[1.01]">
+                        Generate Personalized Plan
+                    </button>
+                </div>
+
+                <div id="coach-loading" class="mt-8 text-center hidden">
+                    <svg class="animate-spin h-8 w-8 text-pc-primary mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <p class="text-pc-text mt-2">Consulting the AI Hydration Engine...</p>
+                </div>
+
+                <div id="coach-results" class="mt-10 p-8 bg-white rounded-3xl shadow-2xl soft-shadow hidden border-4 border-pc-secondary/50">
+                    <h3 class="text-3xl font-extrabold text-pc-secondary mb-4">Your Custom Hydration Plan:</h3>
+                    <div id="advice-text" class="text-gray-700 space-y-4 mb-6"></div>
+                    <div id="advice-sources" class="text-sm text-gray-500 border-t pt-4 mt-4 space-y-1"></div>
+                </div>
+
+            </div>
+        </section>
+
+        <section class="py-24 bg-pc-light-accent">
+            <div class="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
+                <h2 class="text-4xl md:text-5xl font-extrabold text-pc-text mb-6">
+                    Ready to Start Making an Impact?
+                </h2>
+                <p class="text-xl text-pc-secondary mb-10 font-medium">
+                    Choose Pure Coco—for better hydration, a cleaner planet, and resilient water for all.
+                </p>
+                <a href="#product" class="inline-block bg-pc-primary hover:bg-pc-secondary text-pc-text text-2xl font-extrabold py-4 px-12 rounded-full shadow-2xl transform hover:scale-[1.05] transition duration-300">
+                    Order Your Case Today
+                </a>
+            </div>
+        </section>
+
+        <footer class="bg-pc-text py-10">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-gray-400">
+                <div class="flex justify-center space-x-8 mb-4">
+                    <a href="#" class="hover:text-pc-primary transition duration-300 text-sm">Mission</a>
+                    <a href="#impact" class="hover:text-pc-primary transition duration-300 text-sm">How Your Can Helps</a>
+                    <a href="#" class="hover:text-pc-primary transition duration-300 text-sm">Impact Report</a>
+                    <a href="#" class="hover:text-pc-primary transition duration-300 text-sm">Transparency</a>
+                    <a href="#" class="hover:text-pc-primary transition duration-300 text-sm">Wholesale</a>
+                </div>
+                <p class="text-xs mt-4 leading-relaxed">&copy; 2025 Pure Coco. Hydrating Today. Empowering Tomorrow. | Packaging: <span class="font-bold text-pc-primary">100%</span> Recycled Aluminum.</p>
+            </div>
+        </footer>
+    </div>
+    
+    <script type="module">
+        // Register ScrollTrigger plugin (needs to be done if loading from CDN)
+        gsap.registerPlugin(ScrollTrigger);
+
+        // Global Three.js variables
+        let scene, camera, renderer, canMesh;
+        let clock = new THREE.Clock();
+
+        // --- GLOBAL JS FUNCTIONS (MADE AVAILABLE TO HTML) ---
+        
+        // SIMPLE PRODUCT PRE-ORDER MODAL (MOCK)
+        window.openProductModal = function(type) {
+            const modal = document.getElementById('product-modal');
+            const typeInput = document.getElementById('product-type');
+            const title = document.getElementById('product-modal-title');
+
+            if (!modal || !typeInput || !title) return;
+
+            typeInput.value = type;
+            // Fixed bad character encoding for em-dash
+            title.textContent = type === 'bulk' ? 'Pre-order Pure Coco 12-Pack' : 'Pre-order a Pure Coco Can';
+
+            modal.classList.remove('hidden');
+        }
+
+        window.closeProductModal = function() {
+            const modal = document.getElementById('product-modal');
+            if (modal) {
+                modal.classList.add('hidden');
+            }
+        }
+
+        function submitProductPreorder(event) {
+            event.preventDefault();
+            const form = event.target;
+            const type = document.getElementById('product-type')?.value || 'single';
+            const email = form.querySelector('input[name="email"]').value;
+            const city = form.querySelector('input[name="city"]').value;
+            const quantity = form.querySelector('input[name="quantity"]').value;
+
+            console.log('Mock preorder submitted:', { type, email, city, quantity });
+            // Fixed bad character encoding for em-dash
+            alert('Thanks for your interest in Pure Coco! This is a mock pre-order for now—we’re using it to gauge demand by city.');
+            closeProductModal();
+            form.reset();
+        }
+        
+        // Attach event listener to the form
+        document.addEventListener('DOMContentLoaded', () => {
+             const preorderForm = document.getElementById('preorder-form');
+             if (preorderForm) {
+                 preorderForm.addEventListener('submit', submitProductPreorder);
+             }
+        });
+
+        // --- GEMINI API INTEGRATION ---
+        // NOTE: Replace this placeholder with your actual Gemini API key for the Coach section to work.
+        const apiKey = ""; 
+        const coachButton = document.getElementById('coach-button');
+        const loadingDiv = document.getElementById('coach-loading');
+        const resultsDiv = document.getElementById('coach-results');
+        const adviceTextDiv = document.getElementById('advice-text');
+        const adviceSourcesDiv = document.getElementById('advice-sources');
+        
+        async function fetchWithRetry(url, options, maxRetries = 5) {
+            for (let i = 0; i < maxRetries; i++) {
+                try {
+                    const response = await fetch(url, options);
+                    if (!response.ok) {
+                        if (response.status === 429 && i < maxRetries - 1) {
+                            const delay = Math.pow(2, i) * 1000 + Math.random() * 1000;
+                            await new Promise(resolve => setTimeout(resolve, delay));
+                            continue; // Retry request
+                        }
+                        throw new Error(`API request failed with status: ${response.status}`);
+                    }
+                    return response;
+                } catch (error) {
+                    if (i === maxRetries - 1) {
+                        throw new Error(`Max retries reached. ${error.message}`);
+                    }
+                    // Handle network errors or other exceptions by retrying
+                }
+            }
+        }
+        
+        // Made generateHydrationAdvice a global function
+        window.generateHydrationAdvice = async function() {
+            const weight = document.getElementById('coach-weight').value;
+            const activity = document.getElementById('coach-activity').value;
+            const climate = document.getElementById('coach-climate').value;
+
+            if (!weight || weight <= 0) {
+                alert("Please enter a valid weight.");
+                return;
+            }
+            if (apiKey === "") {
+                 alert("The Gemini API Key is missing. Please add your key to the 'apiKey' variable in the script block to enable the Coach feature.");
+                 return;
+            }
+
+            loadingDiv.classList.remove('hidden');
+            resultsDiv.classList.add('hidden');
+            coachButton.disabled = true;
+
+            const userQuery = `I am a user weighing ${weight}kg, with an activity level of ${activity}, living in a ${climate} climate. I need a daily hydration plan. Please provide a concise, single-paragraph summary of the recommended daily water intake (in liters) for my profile. Also, in a separate, brief paragraph, explain why Potassium is a key electrolyte for this profile, referencing external scientific sources (Google Search). Structure the response using Markdown.`;
+            
+            const systemPrompt = "You are the Pure Coco Hydration Coach. Your advice must be science-backed, concise, encouraging, and framed to recommend optimal hydration and electrolyte balance. Use Google Search grounding.";
+            
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+
+            const payload = {
+                contents: [{ parts: [{ text: userQuery }] }],
+                config: {
+                    tools: [{ googleSearch: {} }],
+                },
+                systemInstruction: systemPrompt
+            };
+
+            try {
+                const response = await fetchWithRetry(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                const result = await response.json();
+                
+                const candidate = result.candidates?.[0];
+                const text = candidate?.content?.parts?.[0]?.text || "Sorry, I couldn't generate advice right now. Please try again later.";
+                
+                // 1. Extract and display the generated text
+                adviceTextDiv.innerHTML = marked.parse(text);
+
+                // 2. Extract and display grounding sources (citations)
+                let sourcesHtml = 'Sources: ';
+                const groundingMetadata = candidate?.groundingMetadata;
+                let sources = [];
+
+                if (groundingMetadata && groundingMetadata.groundingAttributions) {
+                    sources = groundingMetadata.groundingAttributions
+                        .map(attr => ({
+                            uri: attr.web?.uri,
+                            title: attr.web?.title,
+                        }))
+                        .filter(source => source.uri && source.title);
+
+                    if (sources.length > 0) {
+                        sourcesHtml += sources.map((s, i) => 
+                            // Update text color for links
+                            `<a href="${s.uri}" target="_blank" class="text-pc-primary hover:underline">${i + 1}. ${s.title}</a>`
+                        ).join(' | ');
+                    } else {
+                        sourcesHtml = 'No sources cited.';
+                    }
+                } else {
+                    sourcesHtml = 'No sources cited.';
+                }
+                
+                adviceSourcesDiv.innerHTML = sourcesHtml;
+                
+                resultsDiv.classList.remove('hidden');
+
+            } catch (error) {
+                console.error("Gemini API Error:", error);
+                adviceTextDiv.innerHTML = '<p class="text-red-500 font-semibold">An error occurred while fetching your hydration plan. Please check the console for details and ensure your API key is correct.</p>';
+                adviceSourcesDiv.innerHTML = '';
+                resultsDiv.classList.remove('hidden');
+            } finally {
+                loadingDiv.classList.add('hidden');
+                coachButton.disabled = false;
+            }
+        };
+
+        // Helper function for markdown parsing (since we need to display the response text)
+        const marked = {
+            parse: (text) => {
+                // A simplified Markdown parser for demonstration purposes (handles paragraphs and bold)
+                text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+                // Replace \n\n with </p><p> and put in <p> tags
+                const paragraphs = text.split('\n\n').filter(p => p.trim() !== '');
+                let html = paragraphs.map(p => {
+                    // Replace single \n with <br> for soft breaks within a paragraph
+                    let content = p.replace(/\n/g, '<br>');
+                    // Wrap in <p> tag
+                    return `<p>${content}</p>`;
+                }).join('');
+                return html;
+            }
+        };
+
+
+        // --- THREE.JS IMPLEMENTATION ---
+        
+        const canvas = document.getElementById('webgl-canvas');
+        if (canvas) {
+            init();
+            animate();
+        } else {
+             console.error("Canvas element #webgl-canvas not found. 3D animation disabled.");
+        }
+
+        function init() {
+            // Scene Setup
+            scene = new THREE.Scene();
+            // Updated to use the new white background
+            scene.background = new THREE.Color(0xffffff); 
+
+            // Camera Setup
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.z = 2.0; 
+            camera.position.y = 0;
+
+            // Renderer Setup
+            renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            
+            createCan();
+            setupScrollAnimation();
+            window.addEventListener('resize', onWindowResize, false);
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        // --- SHADERS (GLSL) ---
+        // NOTE: The shader logic is updated to map the old colors to the new color palette.
+        const fragmentShader = `
+            uniform vec3 uColor;
+            uniform float uTime;
+            uniform float uDitherThreshold;
+            varying vec3 vNormal;
+            varying vec3 vViewPosition;
+            
+            float dither(vec2 pos, float value) {
+                vec2 modPos = mod(pos, 4.0);
+                float x = modPos.x;
+                float y = modPos.y;
+
+                float pattern = 0.0;
+                if (x == 0.0 && y == 0.0) pattern = 1.0/16.0;
+                else if (x == 2.0 && y == 2.0) pattern = 2.0/16.0;
+                else if (x == 3.0 && y == 0.0) pattern = 3.0/16.0;
+                else if (x == 1.0 && y == 2.0) pattern = 4.0/16.0;
+
+                return value + pattern * uDitherThreshold;
+            }
+            
+            void main() {
+                // Fixed light direction for soft shading
+                vec3 lightDirection = normalize(vec3(0.5, 1.0, 1.0));
+                
+                vec3 normal = normalize(vNormal);
+                float diffuse = max(dot(normal, lightDirection), 0.0);
+                
+                float ambient = 0.4;
+                float intensity = diffuse * 0.6 + ambient; 
+
+                // Define the NEW pure color palette for the dither effect
+                vec3 colorLow = vec3(255.0/255.0, 255.0/255.0, 255.0/255.0); // PC-BACKGROUND (White)
+                vec3 colorMid = vec3(26.0/255.0, 26.0/255.0, 26.0/255.0); // PC-TEXT (Black)
+                vec3 colorHigh = vec3(0.0/255.0, 230.0/255.0, 118.0/255.0); // PC-PRIMARY (Bright Aqua)
+
+                // Add a gentle ripple effect based on time (uTime)
+                float ripple = sin(vViewPosition.y * 3.0 + uTime * 1.5) * 0.05;
+                intensity += ripple;
+
+                vec3 finalColor;
+                
+                float ditheredIntensity = dither(gl_FragCoord.xy, intensity);
+
+                if (ditheredIntensity > 0.8) {
+                    finalColor = colorHigh;
+                } else if (ditheredIntensity > 0.4) {
+                    finalColor = colorMid; 
+                } else {
+                    finalColor = colorLow;
+                }
+
+                gl_FragColor = vec4(finalColor, 1.0);
+            }
+        `;
+
+        const vertexShader = `
+            varying vec3 vNormal;
+            varying vec3 vViewPosition;
+            
+            void main() {
+                vNormal = normalize(normalMatrix * normal);
+                vec4 worldPosition = modelMatrix * vec4(position, 1.0);
+                vViewPosition = worldPosition.xyz;
+                gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+            }
+        `;
+
+        function createCan() {
+            const canMaterial = new THREE.ShaderMaterial({
+                uniforms: {
+                    uTime: { value: 0.0 },
+                    uDitherThreshold: { value: 0.1 },
+                    // Updated to use the new background/base color
+                    uColor: { value: new THREE.Color(0xffffff) }, 
+                },
+                vertexShader: vertexShader,
+                fragmentShader: fragmentShader,
+            });
+
+            // Geometry (A simple cylinder representing a drink can)
+            const canGeometry = new THREE.CylinderGeometry(0.5, 0.5, 2.0, 32);
+            canMesh = new THREE.Mesh(canGeometry, canMaterial);
+            
+            // Set initial position and rotation
+            canMesh.rotation.x = -0.3; // Tilt slightly forward
+            canMesh.position.y = -0.5;
+
+            scene.add(canMesh);
+        }
+
+        function setupScrollAnimation() {
+            const tl = gsap.timeline({
+                scrollTrigger: {
+                    trigger: ".content-overlay",
+                    start: "top top", 
+                    end: "bottom bottom", 
+                    scrub: true,
+                    markers: false,
+                }
+            });
+
+            // Define animation steps along the scroll path:
+            tl.to(canMesh.rotation, {
+                y: Math.PI * 3, // 3 full rotations
+                x: -0.2, // Keep the forward tilt subtle
+                duration: 5,
+                ease: "power1.inOut"
+            }, 0)
+            .to(canMesh.position, {
+                x: 1.0, // Move the can from center to slightly right
+                y: 0.5, // Move it up slightly
+                duration: 5,
+                ease: "power1.inOut"
+            }, 0)
+            .to(canMesh.scale, {
+                x: 0.7, y: 0.7, z: 0.7, // Shrink slightly into the background
+                duration: 5,
+                ease: "power1.inOut"
+            }, 0);
+        }
+
+        // Render Loop
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            const elapsed = clock.getElapsedTime();
+            
+            if (canMesh && canMesh.material.uniforms.uTime) {
+                canMesh.material.uniforms.uTime.value = elapsed;
+            }
+
+            // Continuous rotation when not scrolling hard
+            if (canMesh && window.scrollY < window.innerHeight * 0.8) {
+                canMesh.rotation.y += 0.002;
+            }
+
+            if(renderer && scene && camera) {
+                 renderer.render(scene, camera);
+            }
+        }
+    </script>
+</body>
+</html>
