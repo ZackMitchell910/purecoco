@@ -1,0 +1,8 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pure Coco – Hydration That Funds Clean Water</title>
+    <meta name="description" content="Pure Coco is 100% Nam Hom coconut water that hydrates you and funds clean water projects for communities in need.">
+    <meta property="og:title" content="Pure Coco – Hydration That Funds Clean Water">

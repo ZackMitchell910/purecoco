@@ -1,0 +1,40 @@
+        </section>
+
+        <!-- 4. Social Proof & Story Section -->
+        <section id="story" class="py-20 md:py-24 bg-pure-accent bg-with-noise border-t border-pure-cream/40">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-16">
+                <div class="text-center mb-10">
+                    <p class="text-xs font-semibold tracking-[0.2em] uppercase text-pure-green mb-3">Loved by Hydration-First Humans</p>
+                    <h2 class="text-3xl md:text-4xl font-extrabold text-pure-charcoal mb-4">
+                        Small Switch. Big Ripple Effect for People and Planet.
+                    </h2>
+                    <p class="text-lg text-gray-700 max-w-3xl mx-auto">
+                        From morning workouts to late-night study sessions, people are choosing Pure Coco for clean, natural hydration that also funds clean water access.
+                </div>
+                <div class="grid md:grid-cols-3 gap-6">
+                    <div class="bg-white rounded-3xl p-6 soft-shadow text-left">
+                <p class="text-sm text-gray-600 mb-4">“Pure Coco became my go-to post-run drink. I love that it actually does good beyond my bottle.”</p>
+                        <p class="text-xs font-semibold text-pure-charcoal">ALEX • MARATHONER</p>
+                        <p class="text-xs font-semibold text-pure-charcoal">ALEX • MARATHONER</p>
+                    </div>
+                    <div class="bg-white rounded-3xl p-6 soft-shadow text-left">
+                <p class="text-sm text-gray-600 mb-4">“Pure Coco became my go-to post-run drink. I love that it actually does good beyond my bottle.”</p>
+                        <p class="text-xs font-semibold text-pure-charcoal">ALEX • MARATHONER</p>
+                        <p class="text-xs font-semibold text-pure-charcoal">PRIYA • NEW PARENT</p>
+                    </div>
+                    <div class="bg-white rounded-3xl p-6 soft-shadow text-left">
+                <p class="text-sm text-gray-600 mb-4">“Pure Coco became my go-to post-run drink. I love that it actually does good beyond my bottle.”</p>
+                        <p class="text-xs font-semibold text-pure-charcoal">ALEX • MARATHONER</p>
+                        <p class="text-xs font-semibold text-pure-charcoal">JORDAN • TRAINER</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Institutional/Mission Slice -->
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid md:grid-cols-2 gap-16 items-center">
+                
+                <div class="md:order-2 flex justify-center">
+                    <img 
+                        src="public/cantropical.png" 
+                        alt="Pure Coco cans stacked with clean water impact icons" 
+                        class="rounded-3xl shadow-2xl object-cover"
