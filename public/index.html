@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -6,21 +6,19 @@
     <title>Pure Coco - Plastic-Light Hydration for a Thirsty World</title>
     <meta name="description" content="Pure Coco is 100% Nam Hom coconut water that hydrates you and funds clean water projects for communities in need.">
     <meta property="og:title" content="Pure Coco - Plastic-Light Hydration for a Thirsty World">
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pure Coco – Plastic-Light Hydration for a Thirsty World</title>
-    <meta name="description" content="Pure Coco is 100% Nam Hom coconut water that hydrates you and funds clean water projects for communities in need.">
-    <meta property="og:title" content="Pure Coco – Plastic-Light Hydration for a Thirsty World">
     <meta property="og:description" content="Every can of Pure Coco you drink helps fund sustainable clean water infrastructure around the world.">
     <meta property="og:type" content="website">
     <meta property="og:image" content="public/cantropical.png">
     <meta property="og:url" content="https://purecoco.vercel.app/">
 
-    <!-- Favicons -->
     <link rel="icon" type="image/svg+xml" href="public/svglogo.svg">
     <link rel="icon" type="image/png" href="public/logo.png">
     
-    <!-- Tailwind Config: Keeping the Warm, Organic Palette -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.138.3/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.11.3/dist/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.11.3/dist/ScrollTrigger.min.js"></script>
+    
     <script>
         tailwind.config = {
             theme: {
@@ -43,12 +41,6 @@
         }
     </script>
 
-    <!-- Load Core Libraries: Three.js (3D), GSAP (Animation), Tailwind (Styling) -->
-    <script src="https://cdn.jsdelivr.net/npm/three@0.138.3/build/three.min.js" defer></script>
-    <script src="https://cdn.jsdelivr.net/npm/gsap@3.11.3/dist/gsap.min.js" defer></script>
-    <script src="https://cdn.jsdelivr.net/npm/gsap@3.11.3/dist/ScrollTrigger.min.js" defer></script>
-    <script src="https://cdn.tailwindcss.com" defer></script>
-    
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
         
@@ -69,9 +61,9 @@
             z-index: 10; /* Above the 3D canvas */
             /* Ensure background cream fades in correctly over the canvas */
             background: linear-gradient(to bottom, 
-                        rgba(248, 245, 241, 0) 0vh,    /* Transparent cream at the top of hero */
-                        rgba(248, 245, 241, 0.9) 80vh, /* Fade to near-opaque cream */
-                        #f8f5f1 100vh);                /* Solid cream past the hero */
+                                rgba(248, 245, 241, 0) 0vh,    /* Transparent cream at the top of hero */
+                                rgba(248, 245, 241, 0.9) 80vh, /* Fade to near-opaque cream */
+                                #f8f5f1 100vh);                /* Solid cream past the hero */
             min-height: 200vh; /* Ensures scrollable area for GSAP interaction */
         }
         
@@ -79,8 +71,9 @@
              box-shadow: 0 4px 10px -1px rgba(0, 0, 0, 0.08), 0 2px 6px -2px rgba(0, 0, 0, 0.04);
         }
         .bg-with-noise {
-            background-image: url('data:image/svg+xml;base64,PHN2ZyB2aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxnIGZpbGw9IiNmMGYwZjAiIGZpbGwtb3BhY2l0eT0iMC4wMyI+PHBhdGggZD0iTS0xIDBoMzJ2MzJIMC0xem0wIDMybDMxLTUuMzktMi4yOC04LjUzLTQuMS0uOTQtLjM2LTQuMTEtNy42LS40MS0xMC44LTYuMDktMS43NS0xLjI0LTEuMDQtNC42LTQuNS4zLTMuOTItMi45LTguMDctMi42LTU.5Mi01LjA5LS4wOS02LjAzLS43Ni01LjYtLjI2eiIvPjwvZz48L3N2Zz4=');
-            background-size: 120px 120px;
+            /* Fix: The original SVG base64 had encoding issues and was very large. Using a simplified noise image for robustness. */
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 4 4' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.05'/%3E%3C/svg%3E");
+            background-size: 100px 100px;
             background-blend-mode: multiply;
         }
 
@@ -103,24 +96,21 @@
 </head>
 <body class="font-sans bg-pure-cream text-pure-charcoal antialiased">
 
-    <!-- WebGL Canvas will be rendered here by Three.js -->
     <canvas id="webgl-canvas"></canvas>
 
-    <!-- HTML Content Overlays -->
     <div class="content-overlay">
 
-        <!-- Product pre-order modal (mock) -->
         <div id="product-modal" class="fixed inset-0 bg-black/40 flex items-center justify-center px-4 z-50 hidden">
             <div class="bg-white rounded-3xl max-w-md w-full p-6 soft-shadow relative">
                 <button type="button" class="absolute right-4 top-4 text-gray-400 hover:text-pure-charcoal" onclick="closeProductModal()" aria-label="Close pre-order form">
-                    ✕
+                    &times;
                 </button>
                 <h2 id="product-modal-title" class="text-xl font-bold text-pure-charcoal mb-2">
                     Pre-order Pure Coco
                 </h2>
-                <p class="text-sm text-gray-600 mb-4">�Pure Coco became my go-to post-run drink. I love that it actually does good beyond my bottle.�</p>
-                        <p class="text-xs font-semibold text-pure-charcoal">ALEX � MARATHONER</p>
-                <form action="mailto:hello@purecoco.io" method="POST" enctype="text/plain" class="space-y-4">
+                <p class="text-sm text-gray-600 mb-4">“Pure Coco became my go-to post-run drink. I love that it actually does good beyond my bottle.”</p>
+                <p class="text-xs font-semibold text-pure-charcoal">ALEX • MARATHONER</p>
+                <form id="preorder-form" class="space-y-4">
                     <input type="hidden" id="product-type" value="single">
                     <label class="block text-sm text-pure-charcoal font-medium">
                         Email
@@ -141,14 +131,12 @@
             </div>
         </div>
 
-        <!-- Header & Navigation -->
         <header class="p-4 md:p-6 sticky top-0 z-50 rounded-b-2xl">
             <div class="max-w-7xl mx-auto flex justify-between items-center bg-white/80 backdrop-blur-sm p-4 rounded-3xl soft-shadow">
-                <!-- Logo --><a href="#hero" class="flex items-center space-x-2">
+                <a href="#hero" class="flex items-center space-x-2">
                     <img src="public/logo.png" alt="Pure Coco logo" class="w-9 h-9 object-contain">
                     <span class="text-xl font-extrabold text-pure-charcoal">Pure Coco</span>
                 </a>
-                <!-- Navigation + CTA -->
                 <nav class="hidden md:flex items-center space-x-6 text-sm font-medium">
                     <a href="#product" class="text-pure-charcoal hover:text-pure-green transition">Product</a>
                     <a href="#benefits" class="text-pure-charcoal hover:text-pure-green transition">Benefits</a>
@@ -156,13 +144,12 @@
                     <a href="#story" class="text-pure-charcoal hover:text-pure-green transition">Story</a>
                     <a href="#coach-section" class="text-pure-charcoal hover:text-pure-green transition">Coach</a>
                 </nav>
-                <!-- CTA Button --><a href="#shop" class="ml-4 bg-pure-green hover:bg-emerald-600 text-white font-semibold py-2 px-6 rounded-full shadow-lg transition duration-300 soft-shadow">
+                <a href="#shop" class="ml-4 bg-pure-green hover:bg-emerald-600 text-white font-semibold py-2 px-6 rounded-full shadow-lg transition duration-300 soft-shadow">
                     Shop Pure Coco
                 </a>
             </div>
         </header>
 
-        <!-- 1. Hero Section (Overlays 3D Canvas) -->
         <section id="hero" class="pt-32 pb-24 md:pb-40 h-[90vh] flex items-center">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
                 <div class="hero-text grid md:grid-cols-2 gap-10 items-center bg-white/70">
@@ -174,6 +161,7 @@
                         </h1>
                         <p class="text-lg md:text-xl text-gray-700 font-medium">
                             Refreshing coconut water for you, real resilience for communities in need. One simple swap away from single-use plastic moves us toward a future where disaster response and everyday hydration don't depend on bottles that outlive the people they serve.
+                        </p>
                         <div class="flex flex-col sm:flex-row sm:items-center gap-4 pt-2">
                             <a id="shop" href="#product" class="inline-block bg-pure-green hover:bg-emerald-600 text-white text-lg font-bold py-3 px-8 rounded-full shadow-2xl shadow-emerald-400/50 transform hover:-translate-y-1 transition duration-300 text-center">
                                 Shop Pure Coco
@@ -197,12 +185,12 @@
             </div>
         </section>
 
-        <!-- How your can helps strip -->
         <section id="impact-strip" class="bg-pure-accent bg-with-noise py-6 md:py-8 border-y border-pure-cream/60">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex flex-col md:flex-row items-center justify-between gap-6">
                     <p class="text-sm uppercase tracking-[0.2em] font-semibold text-pure-charcoal/80">
                         Every can does more than hydrate
+                    </p>
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 w-full md:w-auto">
                         <div class="flex items-center space-x-3">
                             <div class="flex h-10 w-10 items-center justify-center rounded-2xl bg-white soft-shadow">
@@ -211,6 +199,7 @@
                             <p class="text-sm text-gray-700">
                                 <span class="font-semibold">You sip Pure Coco</span><br>
                                 100% natural Nam Hom coconut water.
+                            </p>
                         </div>
                         <div class="flex items-center space-x-3">
                             <div class="flex h-10 w-10 items-center justify-center rounded-2xl bg-white soft-shadow">
@@ -219,6 +208,7 @@
                             <p class="text-sm text-gray-700">
                                 <span class="font-semibold">We allocate funds</span><br>
                                 Each can supports clean water initiatives.
+                            </p>
                         </div>
                         <div class="flex items-center space-x-3">
                             <div class="flex h-10 w-10 items-center justify-center rounded-2xl bg-white soft-shadow">
@@ -227,13 +217,13 @@
                             <p class="text-sm text-gray-700">
                                 <span class="font-semibold">Communities gain access</span><br>
                                 Sustainable infrastructure, not just one-time drops.
+                            </p>
                         </div>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- 2. Product Section -->
         <section id="product" class="bg-pure-cream py-20 md:py-24 border-b border-pure-accent/40">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="grid lg:grid-cols-[2fr,1.5fr] gap-12 items-start">
@@ -243,8 +233,8 @@
                         </h2>
                         <p class="text-lg text-gray-700 mb-8 max-w-xl">
                             Start small or stock the fridge. Same 100% Nam Hom coconut water, two easy ways to make an impact.
+                        </p>
                         <div class="grid sm:grid-cols-2 gap-6">
-                            <!-- Single Can -->
                             <article class="bg-white rounded-3xl soft-shadow border border-gray-100 p-6 flex flex-col h-full">
                                 <div class="flex items-center justify-between mb-4">
                                     <h3 class="text-xl font-bold text-pure-charcoal">Pure Coco Can</h3>
@@ -262,7 +252,6 @@
                                 </button>
                             </article>
 
-                            <!-- 12-Pack -->
                             <article class="bg-white rounded-3xl soft-shadow border border-pure-green/40 p-6 flex flex-col h-full relative overflow-hidden">
                                 <span class="absolute right-4 top-4 inline-flex items-center rounded-full bg-pure-green text-white text-[10px] font-semibold px-2.5 py-1 shadow-sm">Most popular</span>
                                 <div class="mt-6 flex items-center justify-between mb-4">
@@ -282,7 +271,6 @@
                         </div>
                     </div>
 
-                    <!-- Product details / highlights -->
                     <aside class="bg-white rounded-3xl soft-shadow border border-gray-100 p-6 lg:p-8 space-y-6">
                         <h3 class="text-xl font-bold text-pure-charcoal">What’s inside every can</h3>
                         <ul class="space-y-3 text-sm text-gray-700">
@@ -294,13 +282,13 @@
                         <div class="border-t border-gray-100 pt-4">
                             <p class="text-xs text-gray-500">
                                 Pure Coco is not yet available for direct purchase. Pre-order submissions are mock for now and help us gauge demand by city.
+                            </p>
                         </div>
                     </aside>
                 </div>
             </div>
         </section>
 
-        <!-- 3. Dual Power (Product & Sustainability) Section - Benefits -->
         <section id="benefits" class="bg-pure-accent bg-with-noise py-20 md:py-32">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <h2 class="text-4xl md:text-5xl font-extrabold text-center mb-16 text-pure-charcoal">
@@ -308,30 +296,32 @@
                 </h2>
                 <div class="grid md:grid-cols-2 gap-12">
                     
-                    <!-- Hydration Power --><div class="bg-white p-8 lg:p-10 rounded-3xl shadow-xl soft-shadow border border-gray-100 hover:shadow-2xl transition duration-500">
+                    <div class="bg-white p-8 lg:p-10 rounded-3xl shadow-xl soft-shadow border border-gray-100 hover:shadow-2xl transition duration-500">
                         <div class="text-pure-green mb-4">
-                            <!-- Custom hand-drawn style icon for Electrolyte Power --><svg class="w-14 h-14" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                            <svg class="w-14 h-14" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M13.2 2.8c-.4-.4-.9-.6-1.5-.6s-1.1.2-1.5.6c-.4.4-.6.9-.6 1.5v7.2H5.2c-.4 0-.8.2-1.1.5-.3.3-.4.7-.3 1.1l5.2 9.4c.4.7 1.2 1.1 2 1.1.8 0 1.6-.4 2-1.1l5.2-9.4c.1-.4 0-.8-.3-1.1-.3-.3-.7-.5-1.1-.5H13.2V4.3c0-.6-.2-1.1-.6-1.5zM12 4.3v6.7h6.2l-4.5 8.2c-.2.4-.6.6-1.1.6-.5 0-.9-.2-1.1-.6L5.8 11h6.2V4.3z"/>
                             </svg>
                         </div>
                         <h3 class="text-3xl font-bold mb-4 text-pure-charcoal">Natural Electrolyte Boost</h3>
                         <p class="text-gray-700 mb-4 text-lg">
                             Sourced from the heart of Nam Hom coconuts, Pure Coco naturally delivers over <span class="font-extrabold text-pure-green">600mg</span> of Potassium. Forget the processed sports drinks—this is hydration the way nature intended.
+                        </p>
                         <ul class="list-disc list-inside text-gray-600 space-y-2 pl-4">
                             <li>Only 100% natural, single-source coconut water.</li>
                             <li>Optimal recovery without artificial ingredients.</li>
                         </ul>
                     </div>
 
-                    <!-- Sustainability Commitment --><div class="bg-white p-8 lg:p-10 rounded-3xl shadow-xl soft-shadow border border-gray-100 hover:shadow-2xl transition duration-500">
+                    <div class="bg-white p-8 lg:p-10 rounded-3xl shadow-xl soft-shadow border border-gray-100 hover:shadow-2xl transition duration-500">
                         <div class="text-pure-ochre mb-4">
-                            <!-- Custom hand-drawn style icon for Recycling/Sustainability --><svg class="w-14 h-14" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                            <svg class="w-14 h-14" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M12 2c-1.1 0-2 .9-2 2v2c0 1.1.9 2 2 2s2-.9 2-2V4c0-1.1-.9-2-2-2zM4.93 6.36c.78-.78 2.05-.78 2.83 0l1.41 1.41c-.78.78-.78 2.05 0 2.83-.78.78-2.05.78-2.83 0l-1.41-1.41c-.78-.78-.78-2.05 0-2.83zM2 12c0 1.1.9 2 2 2h2c1.1 0 2-.9 2-2s-.9-2-2-2H4c-1.1 0-2 .9-2 2zM6.36 19.07c-.78.78-.78 2.05 0 2.83.78.78 2.05.78 2.83 0l1.41-1.41c.78-.78.78-2.05 0-2.83-.78-.78-2.05-.78-2.83 0l-1.41 1.41zM12 22c-1.1 0-2-.9-2-2v-2c0-1.1.9-2 2-2s2 .9 2 2v2c0 1.1-.9 2-2 2zM19.07 17.64c-.78-.78-2.05-.78-2.83 0l-1.41 1.41c.78.78.78 2.05 0 2.83.78.78 2.05.78 2.83 0l1.41-1.41c.78-.78.78-2.05 0-2.83zM22 12c0-1.1-.9-2-2-2h-2c-1.1 0-2 .9-2 2s.9 2 2 2h2c1.1 0 2-.9 2-2zM17.64 4.93c.78.78.78 2.05 0 2.83-.78.78-2.05.78-2.83 0l-1.41-1.41c.78-.78.78-2.05 0-2.83.78-.78 2.05-.78 2.83 0l1.41 1.41z"/>
                             </svg>
                         </div>
                         <h3 class="text-3xl font-bold mb-4 text-pure-charcoal">Sustainably Packaged</h3>
                         <p class="text-gray-700 mb-4 text-lg">
-                            We package every drop in a can made from <span class="font-extrabold text-pure-ochre">100%</span> recycled aluminum�the backbone of our mission to move hydration away from single-use plastic.
+                            We package every drop in a can made from <span class="font-extrabold text-pure-ochre">100%</span> recycled aluminum—the backbone of our mission to move hydration away from single-use plastic.
+                        </p>
                         <ul class="list-disc list-inside text-gray-600 space-y-2 pl-4">
                             <li>Infinitely recyclable and durable.</li>
                             <li>Superior product protection and chill.</li>
@@ -342,7 +332,6 @@
             </div>
         </section>
 
-        <!-- 3. The Impact Engine Section (Hydrate-One-Fund-Two) -->
         <section id="impact" class="bg-pure-cream bg-with-noise text-pure-charcoal py-20 md:py-32 border-t border-gray-200">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
                 <h2 class="text-4xl md:text-5xl font-extrabold mb-4">
@@ -350,10 +339,10 @@
                 </h2>
                 <p class="text-xl text-gray-700 max-w-4xl mx-auto mb-16">
                     Your daily hydration choice drives direct, measurable change: less plastic in landfills and oceans, and more clean water flowing where it is needed most.
-
+                </p>
                 <div class="grid md:grid-cols-3 gap-8">
                     
-                    <!-- Pillar 1: Your Purchase --><div class="p-8 rounded-3xl bg-white shadow-lg soft-shadow border border-gray-100 hover:shadow-xl transition duration-300">
+                    <div class="p-8 rounded-3xl bg-white shadow-lg soft-shadow border border-gray-100 hover:shadow-xl transition duration-300">
                         <div class="text-pure-ochre mb-4">
                             <svg class="w-14 h-14 mx-auto" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M17 1H7C5.895 1 5 1.895 5 3v18c0 1.105.895 2 2 2h10c1.105 0 2-.895 2-2V3c0-1.105-.895-2-2-2zM7 3h10v18H7V3zM10 20h4v-1h-4v1z"/>
@@ -363,9 +352,10 @@
                         <h3 class="text-2xl font-bold mb-3">1. Your Purchase</h3>
                         <p class="text-gray-600">
                             Enjoy premium coconut water in planet-friendlier packaging. This choice powers the entire impact engine.
+                        </p>
                     </div>
 
-                    <!-- Pillar 2: Immediate Relief --><div class="p-8 rounded-3xl bg-white shadow-lg soft-shadow border border-gray-100 hover:shadow-xl transition duration-300">
+                    <div class="p-8 rounded-3xl bg-white shadow-lg soft-shadow border border-gray-100 hover:shadow-xl transition duration-300">
                         <div class="text-pure-green mb-4">
                              <svg class="w-14 h-14 mx-auto" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M12 2c-5.52 0-10 4.48-10 10s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15.5c-.28 0-.5-.22-.5-.5v-4.5H7.5c-.28 0-.5-.22-.5-.5s.22-.5.5-.5h3.5V6.5c0-.28.22-.5.5-.5s.5.22.5.5v3.5h3.5c.28 0 .5.22.5.5s-.22.5-.5.5H12.5v4.5c0 .28-.22.5-.5.5z"/>
@@ -374,10 +364,11 @@
                         </div>
                         <h3 class="text-2xl font-bold mb-3">2. Immediate Relief</h3>
                         <p class="text-gray-600">
-                            Each production run sets aside product specifically for shelters, community hubs, and disaster response�so clean hydration is ready when plastic supply chains break.
+                            Each production run sets aside product specifically for shelters, community hubs, and disaster response—so clean hydration is ready when plastic supply chains break.
+                        </p>
                     </div>
 
-                    <!-- Pillar 3: Long-Term Infrastructure --><div class="p-8 rounded-3xl bg-white shadow-lg soft-shadow border border-gray-100 hover:shadow-xl transition duration-300">
+                    <div class="p-8 rounded-3xl bg-white shadow-lg soft-shadow border border-gray-100 hover:shadow-xl transition duration-300">
                         <div class="text-pure-ochre mb-4">
                             <svg class="w-14 h-14 mx-auto" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M22 17c0 1.66-1.34 3-3 3H5c-1.66 0-3-1.34-3-3V7c0-1.66 1.34-3 3-3h14c1.66 0 3 1.34 3 3v10zM5 6c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h14c.55 0 1-.45 1-1V7c0-.55-.45-1-1-1H5z"/>
@@ -386,14 +377,13 @@
                         </div>
                         <h3 class="text-2xl font-bold mb-3">3. Long-Term Clean Water</h3>
                         <p class="text-gray-600">
-                            We channel a meaningful share of profits into long-term solutions�like filtration systems and resilient infrastructure�so communities have safe water long after headlines move on.
+                            We channel a meaningful share of profits into long-term solutions—like filtration systems and resilient infrastructure—so communities have safe water long after headlines move on.
+                        </p>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- 4. Social Proof & Story Section -->
-                <!-- 4. Social Proof & Story Section -->
         <section id="story" class="py-20 md:py-24 bg-pure-accent bg-with-noise border-t border-pure-cream/40">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-16">
                 <div class="text-center mb-10">
@@ -408,19 +398,18 @@
                 <div class="grid md:grid-cols-3 gap-6">
                     <div class="bg-white rounded-3xl p-6 soft-shadow text-left">
                         <p class="text-sm text-gray-600 mb-4">"Pure Coco became my go-to post-run drink. I love that it actually does good beyond my bottle."</p>
-                        <p class="text-xs font-semibold text-pure-charcoal">ALEX � MARATHONER</p>
+                        <p class="text-xs font-semibold text-pure-charcoal">ALEX • MARATHONER</p>
                     </div>
                     <div class="bg-white rounded-3xl p-6 soft-shadow text-left">
                         <p class="text-sm text-gray-600 mb-4">"Tastes incredible, ingredients are simple, and I feel better about every can I crack open."</p>
-                        <p class="text-xs font-semibold text-pure-charcoal">PRIYA � NEW PARENT</p>
+                        <p class="text-xs font-semibold text-pure-charcoal">PRIYA • NEW PARENT</p>
                     </div>
                     <div class="bg-white rounded-3xl p-6 soft-shadow text-left">
-                        <p class="text-sm text-gray-600 mb-4">"We stock Pure Coco in the studio fridge. It�s a talking point with clients about impact."</p>
-                        <p class="text-xs font-semibold text-pure-charcoal">JORDAN � TRAINER</p>
+                        <p class="text-sm text-gray-600 mb-4">"We stock Pure Coco in the studio fridge. It’s a talking point with clients about impact."</p>
+                        <p class="text-xs font-semibold text-pure-charcoal">JORDAN • TRAINER</p>
                     </div>
                 </div>
             </div>
-<!-- Institutional/Mission Slice -->
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid md:grid-cols-2 gap-16 items-center">
                 
                 <div class="md:order-2 flex justify-center">
@@ -438,7 +427,8 @@
                         Beyond Retail: Our Institutional Commitment
                     </h2>
                     <p class="text-gray-700 text-xl mb-8 leading-relaxed">
-                        Our dual distribution model means every can is built for both everyday hydration and moments of crisis. We want Pure Coco to sit in fridges, gym bags, and emergency stockpiles�ready wherever clean, plastic-light hydration is needed most.
+                        Our dual distribution model means every can is built for both everyday hydration and moments of crisis. We want Pure Coco to sit in fridges, gym bags, and emergency stockpiles—ready wherever clean, plastic-light hydration is needed most.
+                    </p>
                     <div class="space-y-4">
                         <div class="flex items-start space-x-4">
                             <span class="text-pure-ochre mt-1 flex-shrink-0">
@@ -454,14 +444,13 @@
                                     <path d="M9.8 19.8c-.3-.3-.8-.3-1.1 0l-4.4-4.4c-.3-.3-.3-.8 0-1.1s.8-.3 1.1 0l3.8 3.8 8.1-8.1c.3-.3.8-.3 1.1 0s.3.8 0 1.1l-8.7 8.7c-.3.3-.8.3-1.1 0z"/>
                                 </svg>
                             </span>
-                            <p class="text-gray-700 text-lg">Supporting the daily water needs of families and communities rebuilding after floods, freezes, and infrastructure failures.
+                            <p class="text-gray-700 text-lg">Supporting the daily water needs of families and communities rebuilding after floods, freezes, and infrastructure failures.</p>
                         </div>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- 5. FAQ & Email Capture -->
         <section id="faq" class="bg-pure-cream bg-with-noise py-20 md:py-24 border-t border-gray-200">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid lg:grid-cols-2 gap-16 items-start">
                 <div>
@@ -470,26 +459,31 @@
                     </h2>
                     <p class="text-lg text-gray-700 mb-6">
                         Curious about ingredients, impact, or how the clean water funding works? Start here.
+                    </p>
                     <div class="space-y-4">
                         <details class="bg-white rounded-2xl p-4 soft-shadow">
                             <summary class="font-semibold text-pure-charcoal cursor-pointer">Is there added sugar or artificial ingredients?</summary>
                             <p class="mt-2 text-sm text-gray-700">
                                 Pure Coco is 100% coconut water from Nam Hom coconuts. No added sugar, no preservatives, no artificial flavors.
+                            </p>
                         </details>
                         <details class="bg-white rounded-2xl p-4 soft-shadow">
                             <summary class="font-semibold text-pure-charcoal cursor-pointer">How does each can support clean water projects?</summary>
                             <p class="mt-2 text-sm text-gray-700">
-                                A portion of every sale supports both rapid-response deployments and long-term water projects�we share updates openly as partnerships grow.
+                                A portion of every sale supports both rapid-response deployments and long-term water projects—we share updates openly as partnerships grow.
+                            </p>
                         </details>
                         <details class="bg-white rounded-2xl p-4 soft-shadow">
                             <summary class="font-semibold text-pure-charcoal cursor-pointer">Is Pure Coco vegan and gluten free?</summary>
                             <p class="mt-2 text-sm text-gray-700">
                                 Yes. It’s naturally vegan, dairy free, and gluten free.
+                            </p>
                         </details>
                         <details class="bg-white rounded-2xl p-4 soft-shadow">
                             <summary class="font-semibold text-pure-charcoal cursor-pointer">Where can I buy Pure Coco?</summary>
                             <p class="mt-2 text-sm text-gray-700">
                                 We’re rolling out across select retailers and direct-from-site. Join the list to be notified when we launch in your area.
+                            </p>
                         </details>
                     </div>
                 </div>
@@ -498,6 +492,7 @@
                     <h3 class="text-2xl font-bold text-pure-charcoal mb-3">Get Early Access & Launch Drops</h3>
                     <p class="text-sm text-gray-700 mb-6">
                         Be the first to know about new flavors, impact updates, and limited drops. No spam—just hydration and good news.
+                    </p>
                     <form class="space-y-4" action="mailto:hello@purecoco.io" method="POST" enctype="text/plain">
                         <label class="block text-sm font-medium text-pure-charcoal">
                             Email address
@@ -513,12 +508,12 @@
                         </button>
                         <p class="text-xs text-gray-500">
                             By joining, you agree to receive occasional emails from Pure Coco. You can unsubscribe at any time.
+                        </p>
                     </form>
                 </div>
             </div>
         </section>
 
-        <!-- 6. Gemini Hydration Coach Section -->
         <section id="coach-section" class="bg-pure-cream bg-with-noise text-pure-charcoal py-20 md:py-32 border-t border-gray-200">
             <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
                 <h2 class="text-4xl md:text-5xl font-extrabold text-center mb-4">
@@ -526,7 +521,7 @@
                 </h2>
                 <p class="text-xl text-gray-700 max-w-3xl mx-auto mb-10 text-center">
                     Get an instant, science-backed hydration plan tailored to your lifestyle, powered by Gemini.
-
+                </p>
                 <div class="bg-pure-accent p-8 rounded-3xl shadow-xl soft-shadow space-y-6">
                     <div class="grid sm:grid-cols-3 gap-4">
                         <label class="block">
@@ -574,7 +569,6 @@
         </section>
 
 
-        <!-- 7. Final CTA Section -->
         <section class="py-24 bg-pure-cream rounded-t-3xl">
             <div class="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
                 <h2 class="text-4xl md:text-5xl font-extrabold text-black mb-6">
@@ -582,18 +576,18 @@
                 </h2>
                 <p class="text-xl text-pure-green mb-10">
                     Every can is a vote for plastic-light hydration and a world where communities have reliable clean water before, during, and after disasters.
-                <a href="#shop" class="inline-block bg-pure-green hover:bg-emerald-600 text-white text-2xl font-extrabold py-4 px-12 rounded-full shadow-2xl transform hover:scale-[1.05] transition duration-300">
+                </p>
+                <a href="#product" class="inline-block bg-pure-green hover:bg-emerald-600 text-white text-2xl font-extrabold py-4 px-12 rounded-full shadow-2xl transform hover:scale-[1.05] transition duration-300">
                     Shop Pure Coco Now
                 </a>
             </div>
         </section>
 
-        <!-- Footer -->
         <footer class="bg-pure-charcoal py-10">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-gray-400">
                 <div class="flex justify-center space-x-8 mb-4">
                     <a href="#" class="hover:text-white transition duration-300 text-sm">Mission</a>
-                    <a href="#impact-explained" class="hover:text-white transition duration-300 text-sm">How Your Can Helps</a>
+                    <a href="#impact" class="hover:text-white transition duration-300 text-sm">How Your Can Helps</a>
                     <a href="#" class="hover:text-white transition duration-300 text-sm">Impact Report</a>
                     <a href="#" class="hover:text-white transition duration-300 text-sm">Transparency</a>
                     <a href="#" class="hover:text-white transition duration-300 text-sm">Wholesale</a>
@@ -603,7 +597,6 @@
         </footer>
     </div>
     
-    <!-- Three.js, Shader, and Gemini API Implementation -->
     <script type="module">
         // Register ScrollTrigger plugin (needs to be done if loading from CDN)
         gsap.registerPlugin(ScrollTrigger);
@@ -612,8 +605,55 @@
         let scene, camera, renderer, canMesh;
         let clock = new THREE.Clock();
 
+        // --- GLOBAL JS FUNCTIONS (MADE AVAILABLE TO HTML) ---
+        
+        // SIMPLE PRODUCT PRE-ORDER MODAL (MOCK)
+        window.openProductModal = function(type) {
+            const modal = document.getElementById('product-modal');
+            const typeInput = document.getElementById('product-type');
+            const title = document.getElementById('product-modal-title');
+
+            if (!modal || !typeInput || !title) return;
+
+            typeInput.value = type;
+            // Fixed bad character encoding for em-dash
+            title.textContent = type === 'bulk' ? 'Pre-order Pure Coco 12-Pack' : 'Pre-order a Pure Coco Can';
+
+            modal.classList.remove('hidden');
+        }
+
+        window.closeProductModal = function() {
+            const modal = document.getElementById('product-modal');
+            if (modal) {
+                modal.classList.add('hidden');
+            }
+        }
+
+        function submitProductPreorder(event) {
+            event.preventDefault();
+            const form = event.target;
+            const type = document.getElementById('product-type')?.value || 'single';
+            const email = form.querySelector('input[name="email"]').value;
+            const city = form.querySelector('input[name="city"]').value;
+            const quantity = form.querySelector('input[name="quantity"]').value;
+
+            console.log('Mock preorder submitted:', { type, email, city, quantity });
+            // Fixed bad character encoding for em-dash
+            alert('Thanks for your interest in Pure Coco! This is a mock pre-order for now—we’re using it to gauge demand by city.');
+            closeProductModal();
+            form.reset();
+        }
+        
+        // Attach event listener to the form
+        document.addEventListener('DOMContentLoaded', () => {
+             const preorderForm = document.getElementById('preorder-form');
+             if (preorderForm) {
+                 preorderForm.addEventListener('submit', submitProductPreorder);
+             }
+        });
+
         // --- GEMINI API INTEGRATION ---
-        const apiKey = "";
+        const apiKey = ""; // API Key placeholder
         const coachButton = document.getElementById('coach-button');
         const loadingDiv = document.getElementById('coach-loading');
         const resultsDiv = document.getElementById('coach-results');
@@ -642,6 +682,7 @@
             }
         }
         
+        // Made generateHydrationAdvice a global function
         window.generateHydrationAdvice = async function() {
             const weight = document.getElementById('coach-weight').value;
             const activity = document.getElementById('coach-activity').value;
@@ -650,6 +691,10 @@
             if (!weight || weight <= 0) {
                 alert("Please enter a valid weight.");
                 return;
+            }
+            if (apiKey === "") {
+                 alert("The Gemini API Key is missing. Please add your key to the 'apiKey' variable in the script block to enable the Coach feature.");
+                 return;
             }
 
             loadingDiv.classList.remove('hidden');
@@ -660,14 +705,14 @@
             
             const systemPrompt = "You are the Pure Coco Hydration Coach. Your advice must be science-backed, concise, encouraging, and framed to recommend optimal hydration and electrolyte balance. Use Google Search grounding.";
             
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
 
             const payload = {
                 contents: [{ parts: [{ text: userQuery }] }],
-                tools: [{ "google_search": {} }],
-                systemInstruction: {
-                    parts: [{ text: systemPrompt }]
+                config: {
+                    tools: [{ googleSearch: {} }],
                 },
+                systemInstruction: systemPrompt
             };
 
             try {
@@ -715,7 +760,7 @@
 
             } catch (error) {
                 console.error("Gemini API Error:", error);
-                adviceTextDiv.innerHTML = '<p class="text-red-500 font-semibold">An error occurred while fetching your hydration plan. Please check the console for details.</p>';
+                adviceTextDiv.innerHTML = '<p class="text-red-500 font-semibold">An error occurred while fetching your hydration plan. Please check the console for details and ensure your API key is correct.</p>';
                 adviceSourcesDiv.innerHTML = '';
                 resultsDiv.classList.remove('hidden');
             } finally {
@@ -727,51 +772,30 @@
         // Helper function for markdown parsing (since we need to display the response text)
         const marked = {
             parse: (text) => {
-                // A simplified Markdown parser for demonstration purposes
+                // A simplified Markdown parser for demonstration purposes (handles paragraphs and bold)
                 text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-                text = text.replace(/\n\n/g, '</p><p>');
-                text = text.replace(/\n/g, '<br>');
-                return `<p>${text}</p>`;
+                // Replace \n\n with </p><p> and put in <p> tags
+                const paragraphs = text.split('\n\n').filter(p => p.trim() !== '');
+                let html = paragraphs.map(p => {
+                    // Replace single \n with <br> for soft breaks within a paragraph
+                    let content = p.replace(/\n/g, '<br>');
+                    // Wrap in <p> tag
+                    return `<p>${content}</p>`;
+                }).join('');
+                return html;
             }
         };
 
 
-        // --- SIMPLE PRODUCT PRE-ORDER MODAL (MOCK) ---
-        function openProductModal(type) {
-            const modal = document.getElementById('product-modal');
-            const typeInput = document.getElementById('product-type');
-            const title = document.getElementById('product-modal-title');
-
-            if (!modal || !typeInput || !title) return;
-
-            typeInput.value = type;
-            title.textContent = type === 'bulk' ? 'Pre-order Pure Coco 12-Pack' : 'Pre-order a Pure Coco Can';
-
-            modal.classList.remove('hidden');
-        }
-
-        function closeProductModal() {
-            const modal = document.getElementById('product-modal');
-            if (modal) {
-                modal.classList.add('hidden');
-            }
-        }
-
-        function submitProductPreorder(event) {
-            event.preventDefault();
-            const form = event.target;
-            const type = document.getElementById('product-type')?.value || 'single';
-            const email = form.querySelector('input[name=\"email\"]').value;
-            const city = form.querySelector('input[name=\"city\"]').value;
-            const quantity = form.querySelector('input[name=\"quantity\"]').value;
-
-            console.log('Mock preorder submitted:', { type, email, city, quantity });
-            alert('Thanks for your interest in Pure Coco! This is a mock pre-order for now—we’re using it to gauge demand by city.');
-            closeProductModal();
-            form.reset();
-        }
-
         // --- THREE.JS IMPLEMENTATION ---
+        
+        const canvas = document.getElementById('webgl-canvas');
+        if (canvas) {
+            init();
+            animate();
+        } else {
+             console.error("Canvas element #webgl-canvas not found.");
+        }
 
         function init() {
             // Scene Setup
@@ -935,25 +959,15 @@
             }
 
             // Continuous rotation when not scrolling hard
-            if (window.scrollY < window.innerHeight * 0.8) {
+            if (canMesh && window.scrollY < window.innerHeight * 0.8) {
                 canMesh.rotation.y += 0.002;
             }
 
-            renderer.render(scene, camera);
-        }
-
-        // --- NEW: Guarantee Initialization on Window Load ---
-        window.onload = function () {
-            try {
-                init();
-                animate();
-            } catch (e) {
-                console.error("Three.js initialization failed:", e);
-                // Fallback UI message might go here if the canvas remains blank
+            if(renderer && scene && camera) {
+                 renderer.render(scene, camera);
             }
-        };
+        }
 
     </script>
 </body>
 </html>
-
